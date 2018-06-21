@@ -27,4 +27,6 @@ EXE_LIBS = \
     -lchemistryModelIPM \
     -lODE \
     -lcombustionModelsIPM \
-    -lipm
+    -lipm \
+    -L$(shell mpicc --showme:libdirs) \
+    -lmpi_cxx

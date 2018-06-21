@@ -28,9 +28,10 @@ License
 #include "UniformField.H"
 #include "extrapolatedCalculatedFvPatchFields.H"
 
-// PControl forward declare
+// ipm_control forward declare
+// there's no way we can get to any of these function w/o IPM being initialized
 extern "C" {
-    int MPI_PControl(const int,...);
+    int ipm_control(const int ctl, char *cmd, void *data);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -61,10 +62,10 @@ template<class ReactionThermo, class ThermoType>
 Foam::tmp<Foam::volScalarField>
 Foam::StandardChemistryModelIPM<ReactionThermo, ThermoType>::tc() const
 {
-    MPI_PControl(1, "Chemistry_time_scale");
+    ipm_control(1, const_cast<char*>("Chemistry_time_scale"), 0);
     tmp<volScalarField> ttc = \
         StandardChemistryModel<ReactionThermo, ThermoType>::tc();
-    MPI_PControl(-1, "Chemistry_time_scale");
+    ipm_control(-1, const_cast<char*>("Chemistry_time_scale"), 0);
     return ttc;
 }
 
@@ -72,9 +73,9 @@ Foam::StandardChemistryModelIPM<ReactionThermo, ThermoType>::tc() const
 template<class ReactionThermo, class ThermoType>
 void Foam::StandardChemistryModelIPM<ReactionThermo, ThermoType>::calculate()
 {
-    MPI_PControl(1, "Chemistry_reaction_rates");
+    ipm_control(1, const_cast<char*>("Chemistry_reaction_rates"), 0);
     StandardChemistryModel<ReactionThermo, ThermoType>::calculate();
-    MPI_PControl(-1, "Chemistry_reaction_rates");
+    ipm_control(-1, const_cast<char*>("Chemistry_reaction_rates"), 0);
 }
 
 
@@ -85,10 +86,10 @@ Foam::scalar Foam::StandardChemistryModelIPM<ReactionThermo, ThermoType>::solve
     const scalarField& deltaT
 )
 {
-    MPI_PControl(1, "ODE_solve");
+    ipm_control(1, const_cast<char*>("ODE_solve"), 0);
     Foam::scalar deltaTMin = \
         Foam::StandardChemistryModel<ReactionThermo, ThermoType>::solve(deltaT);
-    MPI_PControl(-1, "ODE_solve");
+    ipm_control(-1, const_cast<char*>("ODE_solve"), 0);
     return deltaTMin;
 }
 

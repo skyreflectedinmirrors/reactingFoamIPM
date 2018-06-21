@@ -27,9 +27,10 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// PControl forward declare
+// ipm_control forward declare
+// there's no way we can get to any of these function w/o IPM being initialized
 extern "C" {
-    int MPI_PControl(const int,...);
+    int ipm_control(const int ctl, char *cmd, void *data);
 }
 
 template<class ReactionThermo>
@@ -57,9 +58,9 @@ Foam::combustionModels::edcIPM<ReactionThermo>::~edcIPM()
 template<class ReactionThermo>
 void Foam::combustionModels::edcIPM<ReactionThermo>::correct()
 {
-    MPI_PControl(1, "EDC_correction");
+    ipm_control(1, const_cast<char*>("EDC_correction"), 0);
     EDC<ReactionThermo>::correct();
-    MPI_PControl(-1, "EDC_correction");
+    ipm_control(-1, const_cast<char*>("EDC_correction"), 0);
 }
 
 
@@ -67,9 +68,9 @@ template<class ReactionThermo>
 Foam::tmp<Foam::fvScalarMatrix>
 Foam::combustionModels::edcIPM<ReactionThermo>::R(volScalarField& Y) const
 {
-    MPI_PControl(1, "EDC_fuel_consumption");
+    ipm_control(1, const_cast<char*>("EDC_fuel_consumption"), 0);
     const Foam::tmp<Foam::fvScalarMatrix>& R = EDC<ReactionThermo>::R(Y);
-    MPI_PControl(-1, "EDC_fuel_consumption");
+    ipm_control(-1, const_cast<char*>("EDC_fuel_consumption"), 0);
     return R;
 }
 
@@ -78,9 +79,9 @@ template<class ReactionThermo>
 Foam::tmp<Foam::volScalarField>
 Foam::combustionModels::edcIPM<ReactionThermo>::Qdot() const
 {
-    MPI_PControl(1, "EDC_heat_release_rate");
+    ipm_control(1, const_cast<char*>("EDC_heat_release_rate"), 0);
     const Foam::tmp<Foam::volScalarField>& tQdot = EDC<ReactionThermo>::Qdot();
-    MPI_PControl(-1, "EDC_heat_release_rate");
+    ipm_control(-1, const_cast<char*>("EDC_heat_release_rate"), 0);
     return tQdot;
 }
 
