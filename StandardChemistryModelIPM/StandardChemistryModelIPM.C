@@ -28,10 +28,15 @@ License
 #include "UniformField.H"
 #include "extrapolatedCalculatedFvPatchFields.H"
 
+// PControl forward declare
+extern "C" {
+    int MPI_PControl(const int,...);
+}
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ReactionThermo, class ThermoType>
-Foam::StandardChemistryModelIPM<ReactionThermo, ThermoType>::StandardChemistryModel
+Foam::StandardChemistryModelIPM<ReactionThermo, ThermoType>::StandardChemistryModelIPM
 (
     ReactionThermo& thermo
 )
@@ -80,9 +85,9 @@ Foam::scalar Foam::StandardChemistryModelIPM<ReactionThermo, ThermoType>::solve
     const scalarField& deltaT
 )
 {
-    MPI_PControl(1, "ODE_solve")
+    MPI_PControl(1, "ODE_solve");
     Foam::scalar deltaTMin = \
-        Foam::StandardChemistryModel<ReactionThermo, ThermoType>::solve(deltaT)
+        Foam::StandardChemistryModel<ReactionThermo, ThermoType>::solve(deltaT);
     MPI_PControl(-1, "ODE_solve");
     return deltaTMin;
 }

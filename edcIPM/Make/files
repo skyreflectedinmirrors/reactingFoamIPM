@@ -1,27 +1,3 @@
-prefix = $(LIB_SRC)/combustionModels
-
-$(prefix)/combustionModel/combustionModel.C
-$(prefix)/CombustionModel/CombustionModel/CombustionModels.C
-
-$(prefix)/diffusion/diffusions.C
-$(prefix)/infinitelyFastChemistry/infinitelyFastChemistrys.C
-
-$(prefix)/PaSR/PaSRs.C
-$(prefix)/EDC/EDCs.C
 edcsIPM.C
-
-
-$(prefix)/laminar/laminars.C
-
-$(prefix)/FSD/reactionRateFlameAreaModels/consumptionSpeed/consumptionSpeed.C
-$(prefix)/FSD/reactionRateFlameAreaModels/reactionRateFlameArea/reactionRateFlameArea.C
-$(prefix)/FSD/reactionRateFlameAreaModels/reactionRateFlameArea/reactionRateFlameAreaNew.C
-$(prefix)/FSD/reactionRateFlameAreaModels/relaxation/relaxation.C
-
-$(prefix)/FSD/FSDs.C
-
-$(prefix)/zoneCombustion/zoneCombustions.C
-
-$(prefix)/noCombustion/noCombustions.C
 
 LIB = $(FOAM_LIBBIN)/libcombustionModelsIPM

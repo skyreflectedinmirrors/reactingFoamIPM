@@ -30,8 +30,13 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-// include mpi for PControl
-#include <mpi.h>
+// PControl forward declare
+extern "C" {
+    int MPI_PControl(const int,...);
+}
+
+
+
 #include "fvCFD.H"
 #include "turbulentFluidThermoModel.H"
 #include "psiReactionThermo.H"

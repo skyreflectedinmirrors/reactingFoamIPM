@@ -1,4 +1,4 @@
-reactingFoam.C
+reactingFoamIPM.C
 sigUsr1.C
 
 EXE = $(FOAM_APPBIN)/reactingFoamIPM

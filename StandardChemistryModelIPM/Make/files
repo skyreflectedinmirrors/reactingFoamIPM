@@ -1,14 +1,3 @@
-prefix = $(LIB_SRC)/combustionModels
-
-$(prefix)/chemistryModel/basicChemistryModel/basicChemistryModel.C
-$(prefix)/chemistryModel/BasicChemistryModel/BasicChemistryModels.C
 BasicChemistryModelsIPM.C
 
-$(prefix)/chemistryModel/TDACChemistryModel/reduction/makeChemistryReductionMethods.C
-$(prefix)/chemistryModel/TDACChemistryModel/tabulation/makeChemistryTabulationMethods.C
-
-$(prefix)/chemistrySolver/chemistrySolver/makeChemistrySolvers.C
-
-$(prefix)/functionObjects/specieReactionRates/specieReactionRates.C
-
-$(prefix)/LIB = $(FOAM_LIBBIN)/libchemistryModelIPM
+LIB = $(FOAM_LIBBIN)/libchemistryModelIPM

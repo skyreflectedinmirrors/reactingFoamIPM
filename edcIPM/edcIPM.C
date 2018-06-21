@@ -27,7 +27,10 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Simply call base EDC constructor
+// PControl forward declare
+extern "C" {
+    int MPI_PControl(const int,...);
+}
 
 template<class ReactionThermo>
 Foam::combustionModels::edcIPM<ReactionThermo>::edcIPM
@@ -65,7 +68,7 @@ Foam::tmp<Foam::fvScalarMatrix>
 Foam::combustionModels::edcIPM<ReactionThermo>::R(volScalarField& Y) const
 {
     MPI_PControl(1, "EDC_fuel_consumption");
-    Foam::tmp<Foam::fvScalarMatrix>& R = EDC<ReactionThermo>::R(Y);
+    const Foam::tmp<Foam::fvScalarMatrix>& R = EDC<ReactionThermo>::R(Y);
     MPI_PControl(-1, "EDC_fuel_consumption");
     return R;
 }
@@ -76,8 +79,9 @@ Foam::tmp<Foam::volScalarField>
 Foam::combustionModels::edcIPM<ReactionThermo>::Qdot() const
 {
     MPI_PControl(1, "EDC_heat_release_rate");
-    Foam::tmp<Foam::volScalarField>& tQdot = EDC<ReactionThermo>::Qdot();
+    const Foam::tmp<Foam::volScalarField>& tQdot = EDC<ReactionThermo>::Qdot();
     MPI_PControl(-1, "EDC_heat_release_rate");
+    return tQdot;
 }
 
 // ************************************************************************* //

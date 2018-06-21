@@ -1,4 +1,6 @@
 EXE_INC = \
+    -I$(LIB_SRC)/combustionModels/combustionModel/ \
+    -I$(LIB_SRC)/combustionModels/lnInclude \
     -I$(LIB_SRC)/transportModels/compressible/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/specie/lnInclude \
@@ -16,6 +18,5 @@ LIB_LIBS = \
     -lchemistryModelIPM \
     -lfiniteVolume \
     -lmeshTools \
-    -lipm \
-    -lmpi_cxx \
-    -lmpi
+    -lcombustionModels \
+    -lipm

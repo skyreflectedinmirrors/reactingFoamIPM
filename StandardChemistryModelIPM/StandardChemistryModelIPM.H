@@ -53,7 +53,7 @@ class fvMesh;
 template<class ReactionThermo, class ThermoType>
 class StandardChemistryModelIPM
 :
-    public StandardChemistryModel<class ReactionThermo, class ThermoType>
+    public StandardChemistryModel<ReactionThermo, ThermoType>
 {
     // Private Member Functions
 
@@ -64,10 +64,10 @@ class StandardChemistryModelIPM
         //scalar solve(const DeltaTType& deltaT);
 
         //- Disallow copy constructor
-        StandardChemistryModel(const StandardChemistryModel&);
+        StandardChemistryModelIPM(const StandardChemistryModelIPM&);
 
         //- Disallow default bitwise assignment
-        void operator=(const StandardChemistryModel&);
+        void operator=(const StandardChemistryModelIPM&);
 
 
 protected:
@@ -89,11 +89,11 @@ public:
     // Constructors
 
         //- Construct from thermo
-        StandardChemistryModel(ReactionThermo& thermo);
+        StandardChemistryModelIPM(ReactionThermo& thermo);
 
 
     //- Destructor
-    virtual ~StandardChemistryModel();
+    virtual ~StandardChemistryModelIPM();
 
 
     // Member Functions

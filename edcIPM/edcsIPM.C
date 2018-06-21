@@ -31,28 +31,6 @@ License
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
-template<>
-const char* Foam::NamedEnum
-<
-    Foam::combustionModels::EDCversions,
-    4
->::names[] =
-{
-    "v1981",
-    "v1996",
-    "v2005",
-    "v2016"
-};
-
-const Foam::NamedEnum<Foam::combustionModels::EDCversions, 4>
-    Foam::combustionModels::EDCversionNames;
-
-const Foam::combustionModels::EDCversions
-Foam::combustionModels::EDCdefaultVersion
-(
-    Foam::combustionModels::EDCversions::v2005
-);
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
