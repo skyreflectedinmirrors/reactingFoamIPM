@@ -49,6 +49,7 @@ extern "C" {
 #include "fvOptions.H"
 #include "localEulerDdtScheme.H"
 #include "fvcSmooth.H"
+#include "sigUsr1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,6 +65,9 @@ int main(int argc, char *argv[])
     #include "initContinuityErrs.H"
     #include "createFields.H"
     #include "createFieldRefs.H"
+
+    sigUsr1 _sigUsr1;
+    _sigUsr1.set(true);
 
     turbulence->validate();
 
