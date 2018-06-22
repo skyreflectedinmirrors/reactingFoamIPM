@@ -131,7 +131,7 @@ class edcIPM
 public:
 
     //- Runtime type information
-    TypeName("edcIPM");
+    TypeName("EDC");
 
 
     // Constructors

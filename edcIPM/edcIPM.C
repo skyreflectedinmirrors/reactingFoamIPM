@@ -43,7 +43,9 @@ Foam::combustionModels::edcIPM<ReactionThermo>::edcIPM
 )
 :
     EDC<ReactionThermo>(modelType, thermo, turb, combustionProperties)
-{}
+{
+    InfoInFunction << "Using IPM-profiled version of EDC." << nl;
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

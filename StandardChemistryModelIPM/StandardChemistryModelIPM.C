@@ -44,6 +44,7 @@ Foam::StandardChemistryModelIPM<ReactionThermo, ThermoType>::StandardChemistryMo
 :
     StandardChemistryModel<ReactionThermo, ThermoType>(thermo)
 {
+    InfoInFunction << "Using IPM-profiled version of Chemistry." << nl;
 }
 
 

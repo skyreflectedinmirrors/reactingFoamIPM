@@ -83,7 +83,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("standardIPM");
+    TypeName("standard");
 
 
     // Constructors
