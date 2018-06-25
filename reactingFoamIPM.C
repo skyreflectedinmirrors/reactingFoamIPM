@@ -30,15 +30,6 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-// ipm_control forward declare
-// here we must make sure not to call control before IPM (i.e., MPI) has been
-// initialized
-extern "C" {
-    int ipm_control(const int ctl, char *cmd, void *data);
-}
-
-
-
 #include "fvCFD.H"
 #include "turbulentFluidThermoModel.H"
 #include "psiReactionThermo.H"
@@ -50,6 +41,8 @@ extern "C" {
 #include "localEulerDdtScheme.H"
 #include "fvcSmooth.H"
 #include "sigUsr1.H"
+// include MPI header for PControl
+#include "mpi.h"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -99,24 +92,24 @@ int main(int argc, char *argv[])
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        ipm_control(1, const_cast<char*>("solve_density"), 0);
+        MPI_Pcontrol(1, "solve_density");
         #include "rhoEqn.H"
-        ipm_control(-1, const_cast<char*>("solve_density"), 0);
+        MPI_Pcontrol(-1, "solve_density");
 
         while (pimple.loop())
         {
-            ipm_control(1, const_cast<char*>("solve_velocity"), 0);
+            MPI_Pcontrol(1, "solve_velocity");
             #include "UEqn.H"
-            ipm_control(-1, const_cast<char*>("solve_velocity"), 0);
-            ipm_control(1, const_cast<char*>("solve_species"), 0);
+            MPI_Pcontrol(-1, "solve_velocity");
+            MPI_Pcontrol(1, "solve_species");
             #include "YEqn.H"
-            ipm_control(-1, const_cast<char*>("solve_species"), 0);
-            ipm_control(1, const_cast<char*>("solve_energy"), 0);
+            MPI_Pcontrol(-1, "solve_species");
+            MPI_Pcontrol(1, "solve_energy");
             #include "EEqn.H"
-            ipm_control(-1, const_cast<char*>("solve_energy"), 0);
+            MPI_Pcontrol(-1, "solve_energy");
 
             // --- Pressure corrector loop
-            ipm_control(1, const_cast<char*>("solve_pressure"), 0);
+            MPI_Pcontrol(1, "solve_pressure");
             while (pimple.correct())
             {
                 if (pimple.consistent())
@@ -128,14 +121,14 @@ int main(int argc, char *argv[])
                     #include "pEqn.H"
                 }
             }
-            ipm_control(-1, const_cast<char*>("solve_pressure"), 0);
+            MPI_Pcontrol(-1, "solve_pressure");
 
-            ipm_control(1, const_cast<char*>("correct_turbulence"), 0);
+            MPI_Pcontrol(1, "correct_turbulence");
             if (pimple.turbCorr())
             {
                 turbulence->correct();
             }
-            ipm_control(-1, const_cast<char*>("correct_turbulence"), 0);
+            MPI_Pcontrol(-1, "correct_turbulence");
         }
 
         rho = thermo.rho();

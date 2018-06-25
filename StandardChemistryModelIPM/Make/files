@@ -1,3 +1,4 @@
 BasicChemistryModelsIPM.C
+makeChemistrySolversIPM.C
 
 LIB = $(FOAM_LIBBIN)/libchemistryModelIPM
