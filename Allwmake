@@ -4,6 +4,18 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Parse arguments for library compilation
 . $WM_DIR/scripts/AllwmakeParseArguments
 
+[ -n "$IPM_LIBPATH" ] || {
+    echo "Allwmake error: IPM_LIBPATH not set"
+    echo "    Set this environment variable to enable proper compilation"
+    exit 1
+}
+
+[ -n "$MPI_LIBPATH" ] || {
+    echo "Allwmake error: MPI_LIBPATH not set"
+    echo "    Set this environment variable to enable proper compilation"
+    exit 1
+}
+
 [ -n "$FOAM_EXT_LIBBIN" ] || {
     echo "Allwmake error: FOAM_EXT_LIBBIN not set"
     echo "    Check the OpenFOAM entries in your dot-files and source them."

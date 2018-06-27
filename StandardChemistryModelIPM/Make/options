@@ -20,4 +20,5 @@ LIB_LIBS = \
     -lfiniteVolume \
     -lmeshTools \
     -lchemistryModel \
+    -L$(IPM_LIBPATH) \
     -lipm

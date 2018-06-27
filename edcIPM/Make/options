@@ -20,4 +20,5 @@ LIB_LIBS = \
     -lfiniteVolume \
     -lmeshTools \
     -lcombustionModels \
+    -L$(IPM_LIBPATH) \
     -lipm
