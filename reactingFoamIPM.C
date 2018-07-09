@@ -102,7 +102,60 @@ int main(int argc, char *argv[])
             #include "UEqn.H"
             MPI_Pcontrol(-1, "solve_velocity");
             MPI_Pcontrol(1, "solve_species");
-            #include "YEqn.H"
+            MPI_Pcontrol(1, "species_convection");
+            tmp<fv::convectionScheme<scalar>> mvConvection
+            (
+                fv::convectionScheme<scalar>::New
+                (
+                    mesh,
+                    fields,
+                    phi,
+                    mesh.divScheme("div(phi,Yi_h)")
+                )
+            );
+            MPI_Pcontrol(-1, "species_convection");
+            {
+                reaction->correct();
+                Qdot = reaction->Qdot();
+                volScalarField Yt(0.0*Y[0]);
+
+                forAll(Y, i)
+                {
+                    if (i != inertIndex && composition.active(i))
+                    {
+                        volScalarField& Yi = Y[i];
+
+                        MPI_Pcontrol(1, "species_build_equation");
+                        fvScalarMatrix YiEqn
+                        (
+                            fvm::ddt(rho, Yi)
+                          + mvConvection->fvmDiv(phi, Yi)
+                          - fvm::laplacian(turbulence->muEff(), Yi)
+                         ==
+                            reaction->R(Yi)
+                          + fvOptions(rho, Yi)
+                        );
+                        MPI_Pcontrol(-1, "species_build_equation");
+
+                        MPI_Pcontrol(1, "species_solution");
+                        YiEqn.relax();
+
+                        fvOptions.constrain(YiEqn);
+
+                        YiEqn.solve(mesh.solver("Yi"));
+
+                        fvOptions.correct(Yi);
+                        MPI_Pcontrol(-1, "species_solution");
+
+                        Yi.max(0.0);
+                        Yt += Yi;
+                    }
+                }
+
+                Y[inertIndex] = scalar(1) - Yt;
+                Y[inertIndex].max(0.0);
+            }
+
             MPI_Pcontrol(-1, "solve_species");
             MPI_Pcontrol(1, "solve_energy");
             #include "EEqn.H"
