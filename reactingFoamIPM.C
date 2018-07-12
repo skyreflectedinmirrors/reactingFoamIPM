@@ -126,14 +126,29 @@ int main(int argc, char *argv[])
                         volScalarField& Yi = Y[i];
 
                         MPI_Pcontrol(1, "species_build_equation");
+                        MPI_Pcontrol(1, "species_build_equation_ddt");
+                        auto ddt = fvm::ddt(rho, Yi);
+                        MPI_Pcontrol(-1, "species_build_equation_ddt");
+                        MPI_Pcontrol(1, "species_build_equation_conv");
+                        auto conv = mvConvection->fvmDiv(phi, Yi);
+                        MPI_Pcontrol(-1, "species_build_equation_conv");
+                        MPI_Pcontrol(1, "species_build_equation_laplac");
+                        auto laplacian = fvm::laplacian(turbulence->muEff(), Yi);
+                        MPI_Pcontrol(-1, "species_build_equation_laplac");
+                        MPI_Pcontrol(1, "species_build_equation_rxn");
+                        auto rxn = reaction->R(Yi);
+                        MPI_Pcontrol(-1, "species_build_equation_rxn");
+                        MPI_Pcontrol(1, "species_build_equation_opts");
+                        auto opts = fvOptions(rho, Yi);
+                        MPI_Pcontrol(-1, "species_build_equation_opts");
                         fvScalarMatrix YiEqn
                         (
-                            fvm::ddt(rho, Yi)
-                          + mvConvection->fvmDiv(phi, Yi)
-                          - fvm::laplacian(turbulence->muEff(), Yi)
+                            ddt
+                          + conv
+                          - laplacian
                          ==
-                            reaction->R(Yi)
-                          + fvOptions(rho, Yi)
+                            rxn
+                          + opts
                         );
                         MPI_Pcontrol(-1, "species_build_equation");
 
