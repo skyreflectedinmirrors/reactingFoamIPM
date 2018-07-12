@@ -91,7 +91,7 @@ Foam::scalar Foam::StandardChemistryModelIPM<ReactionThermo, ThermoType>::solve
     return deltaTMin;
 }
 
-Template<class ReactionThermo, class ThermoType>
+template<class ReactionThermo, class ThermoType>
 Foam::scalar Foam::StandardChemistryModelIPM<ReactionThermo, ThermoType>::solve
 (
     const scalar deltaT
@@ -102,7 +102,7 @@ Foam::scalar Foam::StandardChemistryModelIPM<ReactionThermo, ThermoType>::solve
     Foam::scalar deltaTMin = \
         Foam::StandardChemistryModel<ReactionThermo, ThermoType>::solve(deltaT);
     MPI_Pcontrol(-1, "ODE_solve_scalar");
-    return deltaTMin
+    return deltaTMin;
 }
 
 
