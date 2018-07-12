@@ -38,7 +38,7 @@ Foam::combustionModels::pasrIPM<ReactionThermo>::pasrIPM
     const word& combustionProperties
 )
 :
-    pasrIPM<ReactionThermo>(modelType, thermo, turb, combustionProperties)
+    PaSR<ReactionThermo>(modelType, thermo, turb, combustionProperties)
 {
     Info << "Using IPM-profiled version of PaSR." << nl;
 }
