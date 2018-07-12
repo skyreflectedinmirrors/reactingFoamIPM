@@ -181,8 +181,7 @@ public:
 
             //- Solve the reaction system for the given time step
             //  and return the characteristic time
-            //  [not instrumented]
-            //virtual scalar solve(const scalar deltaT);
+            virtual scalar solve(const scalar deltaT);
 
             //- Solve the reaction system for the given time step
             //  and return the characteristic time
