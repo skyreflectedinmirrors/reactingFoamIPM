@@ -1,3 +1,4 @@
-edcsIPM.C
+edcIPM/edcsIPM.C
+pasrIPM/pasrsIPM.C
 
 LIB = $(FOAM_LIBBIN)/libcombustionModelsIPM
