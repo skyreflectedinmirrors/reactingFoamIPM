@@ -1,3 +1,6 @@
+sinclude $(GENERAL_RULES)/mplib$(WM_MPLIB)
+sinclude $(RULES)/mplib$(WM_MPLIB)
+
 EXE_INC = \
     -I$(LIB_SRC)/combustionModels/combustionModel/ \
     -I$(LIB_SRC)/combustionModels/lnInclude \
@@ -10,7 +13,8 @@ EXE_INC = \
     -I$(LIB_SRC)/TurbulenceModels/compressible/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
-    -I$(shell mpicc --showme:incdirs)
+    $(PFLAGS) \
+    $(PINC)
 
 LIB_LIBS = \
     -lcompressibleTransportModels \
