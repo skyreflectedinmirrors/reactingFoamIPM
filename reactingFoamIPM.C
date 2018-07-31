@@ -42,7 +42,7 @@ Description
 #include "fvcSmooth.H"
 #include "sigUsr1.H"
 // include MPI header for PControl
-#include "mpi.h"
+#include <mpi.h>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

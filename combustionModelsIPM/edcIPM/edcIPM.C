@@ -25,7 +25,7 @@ License
 
 #include "edcIPM.H"
 // include MPI header for PControl
-#include "mpi.h"
+#include <mpi.h>
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

@@ -28,7 +28,7 @@ License
 #include "UniformField.H"
 #include "extrapolatedCalculatedFvPatchFields.H"
 // include MPI header for PControl
-#include "mpi.h"
+#include <mpi.h>
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -41,7 +41,7 @@ Foam::StandardChemistryModelIPM<ReactionThermo, ThermoType>::StandardChemistryMo
 :
     StandardChemistryModel<ReactionThermo, ThermoType>(thermo)
 {
-    InfoInFunction << "Using IPM-profiled version of Chemistry." << nl;
+    Info << "Using IPM-profiled version of Chemistry." << nl;
 }
 
 
