@@ -57,7 +57,95 @@ template<class ReactionThermo>
 void Foam::combustionModels::edcIPM<ReactionThermo>::correct()
 {
     MPI_Pcontrol(1, "EDC_correction");
-    EDC<ReactionThermo>::correct();
+    if (this->active())
+    {
+        tmp<volScalarField> tepsilon(this->turbulence().epsilon());
+        const volScalarField& epsilon = tepsilon();
+
+        tmp<volScalarField> tmu(this->turbulence().mu());
+        const volScalarField& mu = tmu();
+
+        tmp<volScalarField> tk(this->turbulence().k());
+        const volScalarField& k = tk();
+
+        tmp<volScalarField> trho(this->rho());
+        const volScalarField& rho = trho();
+
+        scalarField tauStar(epsilon.size(), 0);
+
+        if (version_ == EDCversions::v2016)
+        {
+            tmp<volScalarField> ttc(this->chemistryPtr_->tc());
+            const volScalarField& tc = ttc();
+
+            forAll(tauStar, i)
+            {
+                const scalar nu = mu[i]/(rho[i] + small);
+
+                const scalar Da =
+                    max(min(sqrt(nu/(epsilon[i] + small))/tc[i], 10), 1e-10);
+
+                const scalar ReT = sqr(k[i])/(nu*epsilon[i] + small);
+                const scalar CtauI = min(C1_/(Da*sqrt(ReT + 1)), 2.1377);
+
+                const scalar CgammaI =
+                    max(min(C2_*sqrt(Da*(ReT + 1)), 5), 0.4082);
+
+                const scalar gammaL =
+                    CgammaI*pow025(nu*epsilon[i]/(sqr(k[i]) + small));
+
+                tauStar[i] = CtauI*sqrt(nu/(epsilon[i] + small));
+
+                if (gammaL >= 1)
+                {
+                    kappa_[i] = 1;
+                }
+                else
+                {
+                    kappa_[i] =
+                        max
+                        (
+                            min
+                            (
+                                pow(gammaL, exp1_)/(1 - pow(gammaL, exp2_)),
+                                1
+                            ),
+                            0
+                        );
+                }
+            }
+        }
+        else
+        {
+            forAll(tauStar, i)
+            {
+                const scalar nu = mu[i]/(rho[i] + small);
+                const scalar gammaL =
+                    Cgamma_*pow025(nu*epsilon[i]/(sqr(k[i]) + small));
+
+                tauStar[i] = Ctau_*sqrt(nu/(epsilon[i] + small));
+                if (gammaL >= 1)
+                {
+                    kappa_[i] = 1;
+                }
+                else
+                {
+                    kappa_[i] =
+                        max
+                        (
+                            min
+                            (
+                                pow(gammaL, exp1_)/(1 - pow(gammaL, exp2_)),
+                                1
+                            ),
+                            0
+                        );
+                }
+            }
+        }
+
+        //this->chemistryPtr_->solve(tauStar);
+    }
     MPI_Pcontrol(-1, "EDC_correction");
 }
 
