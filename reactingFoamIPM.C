@@ -116,6 +116,9 @@ int main(int argc, char *argv[])
             MPI_Pcontrol(-1, "species_convection");
             {
                 reaction->correct();
+                // insert barrier to avoid biased statistics due to chemistry load
+                // imbalance... doesn't cause much of a slowdown
+                MPI_Barrier(MPI_COMM_WORLD);
                 Qdot = reaction->Qdot();
                 volScalarField Yt(0.0*Y[0]);
 
