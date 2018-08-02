@@ -116,11 +116,11 @@ int main(int argc, char *argv[])
             MPI_Pcontrol(-1, "species_convection");
             {
                 reaction->correct();
-                MPI_Pcontrol(1, "ODE_loadbalance_barrier")
+                MPI_Pcontrol(1, "ODE_loadbalance_barrier");
                 // insert barrier to avoid biased statistics due to chemistry load
                 // imbalance... doesn't cause much of a slowdown
                 MPI_Barrier(MPI_COMM_WORLD);
-                MPI_Pcontrol(-1, "ODE_loadbalance_barrier")
+                MPI_Pcontrol(-1, "ODE_loadbalance_barrier");
                 Qdot = reaction->Qdot();
                 volScalarField Yt(0.0*Y[0]);
 
