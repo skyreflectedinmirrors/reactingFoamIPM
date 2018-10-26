@@ -33,6 +33,7 @@ License
 #include "noChemistrySolver.H"
 #include "EulerImplicit.H"
 #include "ode.H"
+#include "batched.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -74,6 +75,12 @@ License
     makeChemistrySolverTypeIPM                                                 \
     (                                                                          \
         ode,                                                                   \
+        Comp,                                                                  \
+        Thermo                                                                 \
+    );                                                                         \
+    makeChemistrySolverTypeIPM                                                 \
+    (                                                                          \
+        batched,                                                               \
         Comp,                                                                  \
         Thermo                                                                 \
     );                                                                         \

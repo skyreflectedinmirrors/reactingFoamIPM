@@ -1,0 +1,5 @@
+BasicChemistryModelIPM/BasicChemistryModelsIPM.C
+chemistrySolverIPM/batched/batched.C
+chemistrySolverIPM/makeChemistrySolversIPM.C
+
+LIB = $(FOAM_LIBBIN)/libchemistryModelIPM
