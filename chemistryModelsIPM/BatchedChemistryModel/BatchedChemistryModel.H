@@ -38,8 +38,11 @@ SourceFiles
 #define BatchedChemistryModel_H
 
 #include "BasicChemistryModel.H"
+#include "Reaction.H"
 #include "BatchedODESystem.H"
 #include "volFields.H"
+#include "UniformField.H"
+#include "scalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -107,6 +110,37 @@ protected:
         //  (e.g. for multi-chemistry model)
         inline PtrList<volScalarField::Internal>& RR();
 
+        // time setters / inits
+        void initTime
+        (
+            const label size,
+            const scalarField& times,
+            scalarField& out_times
+        );
+
+        void initTime
+        (
+            const label size,
+            const UniformField<scalar>& times,
+            UniformField<scalar>& out_times
+        );
+
+        void setTime
+        (
+            const scalarField& dt,
+            scalarField& dt_out,
+            label celli,
+            label count
+        );
+
+        void setTime
+        (
+            const scalarField& dt,
+            UniformField<scalar>& dt_out,
+            label celli,
+            label count
+        );
+
 
 public:
 
@@ -125,6 +159,12 @@ public:
 
 
     // Member Functions
+
+        //- The reactions
+        inline const PtrList<Reaction<ThermoType>>& reactions() const;
+
+        //- Thermodynamic data of the species
+        inline const PtrList<ThermoType>& specieThermo() const;
 
         //- The number of species
         virtual inline label nSpecie() const;

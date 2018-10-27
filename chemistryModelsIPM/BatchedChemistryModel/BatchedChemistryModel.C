@@ -37,7 +37,7 @@ Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::BatchedChemistryModel
 )
 :
     BasicChemistryModel<ReactionThermo>(thermo),
-    ODESystem(),
+    BatchedODESystem(),
     Y_(this->thermo().composition().Y()),
     reactions_
     (
@@ -49,7 +49,7 @@ Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::BatchedChemistryModel
             (this->thermo()).speciesData()
     ),
     nSpecie_(Y_.size()),
-    nReaction_(dynamic_cast<const reactingMixture<ThermoType>&>(this->thermo()).size()),
+    nReaction_(reactions_.size()),
     Treact_
     (
         BasicChemistryModel<ReactionThermo>::template lookupOrDefault<scalar>
@@ -58,8 +58,7 @@ Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::BatchedChemistryModel
             0
         )
     ),
-    RR_(nSpecie_),
-    dcdt_(nSpecie_)
+    RR_(nSpecie_)
 {
     // Create the fields for the chemistry sources
     forAll(RR_, fieldi)
@@ -209,7 +208,8 @@ void Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::calculate()
 }
 
 
-inline scalarField Foam::BatchedChemistryModel::setTime
+template<class ReactionThermo, class ThermoType>
+void Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::setTime
 (
     const scalarField& dt,
     scalarField& dt_out,
@@ -220,7 +220,8 @@ inline scalarField Foam::BatchedChemistryModel::setTime
     dt_out[count] = dt[celli];
 }
 
-inline scalarField Foam::BatchedChemistryModel::setTime
+template<class ReactionThermo, class ThermoType>
+void Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::setTime
 (
     const scalarField& dt,
     UniformField<scalar>& dt_out,
@@ -231,17 +232,19 @@ inline scalarField Foam::BatchedChemistryModel::setTime
 
 }
 
-inline void Foam::BatchedChemistryModel::initTime<scalarField>
+template<class ReactionThermo, class ThermoType>
+void Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::initTime
 (
     const label size,
     const scalarField& times,
-    scalarField& out_times,
+    scalarField& out_times
 )
 {
     out_times = scalarField(size);
 }
 
-inline void Foam::BatchedChemistryModel::initTime<scalarField>
+template<class ReactionThermo, class ThermoType>
+void Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::initTime
 (
     const label size,
     const UniformField<scalar>& times,
@@ -278,7 +281,7 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
     scalarField c0(nSpecie_ * rho.size());
     scalarField phi((nSpecie_ + 1) * rho.size());
     DeltaTType dt;
-    initTime<DeltaTType>(rho.size(), deltaT, dt);
+    initTime(rho.size(), deltaT, dt);
     labelField integrationMask(rho.size());
     label count = 0;
 

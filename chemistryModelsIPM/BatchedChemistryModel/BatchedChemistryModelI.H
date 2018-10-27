@@ -30,7 +30,7 @@ License
 
 template<class ReactionThermo, class ThermoType>
 inline Foam::label
-Foam::StandardChemistryModel<ReactionThermo, ThermoType>::nEqns() const
+Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::nEqns() const
 {
     // nEqns = (number of species - 1) + temperature + volume
     return nSpecie_ + 1;
@@ -39,7 +39,7 @@ Foam::StandardChemistryModel<ReactionThermo, ThermoType>::nEqns() const
 
 template<class ReactionThermo, class ThermoType>
 inline Foam::PtrList<Foam::DimensionedField<Foam::scalar, Foam::volMesh>>&
-Foam::StandardChemistryModel<ReactionThermo, ThermoType>::RR()
+Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::RR()
 {
     return RR_;
 }
@@ -47,7 +47,7 @@ Foam::StandardChemistryModel<ReactionThermo, ThermoType>::RR()
 
 template<class ReactionThermo, class ThermoType>
 inline const Foam::PtrList<Foam::Reaction<ThermoType>>&
-Foam::StandardChemistryModel<ReactionThermo, ThermoType>::reactions() const
+Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::reactions() const
 {
     return reactions_;
 }
@@ -55,7 +55,7 @@ Foam::StandardChemistryModel<ReactionThermo, ThermoType>::reactions() const
 
 template<class ReactionThermo, class ThermoType>
 inline const Foam::PtrList<ThermoType>&
-Foam::StandardChemistryModel<ReactionThermo, ThermoType>::specieThermo() const
+Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::specieThermo() const
 {
     return specieThermo_;
 }
@@ -63,7 +63,7 @@ Foam::StandardChemistryModel<ReactionThermo, ThermoType>::specieThermo() const
 
 template<class ReactionThermo, class ThermoType>
 inline Foam::label
-Foam::StandardChemistryModel<ReactionThermo, ThermoType>::nSpecie() const
+Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::nSpecie() const
 {
     return nSpecie_;
 }
@@ -71,7 +71,7 @@ Foam::StandardChemistryModel<ReactionThermo, ThermoType>::nSpecie() const
 
 template<class ReactionThermo, class ThermoType>
 inline Foam::label
-Foam::StandardChemistryModel<ReactionThermo, ThermoType>::nReaction() const
+Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::nReaction() const
 {
     return nReaction_;
 }
@@ -79,7 +79,7 @@ Foam::StandardChemistryModel<ReactionThermo, ThermoType>::nReaction() const
 
 template<class ReactionThermo, class ThermoType>
 inline Foam::scalar
-Foam::StandardChemistryModel<ReactionThermo, ThermoType>::Treact() const
+Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::Treact() const
 {
     return Treact_;
 }
@@ -87,7 +87,7 @@ Foam::StandardChemistryModel<ReactionThermo, ThermoType>::Treact() const
 
 template<class ReactionThermo, class ThermoType>
 inline Foam::scalar&
-Foam::StandardChemistryModel<ReactionThermo, ThermoType>::Treact()
+Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::Treact()
 {
     return Treact_;
 }
@@ -95,7 +95,7 @@ Foam::StandardChemistryModel<ReactionThermo, ThermoType>::Treact()
 
 template<class ReactionThermo, class ThermoType>
 inline const Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
-Foam::StandardChemistryModel<ReactionThermo, ThermoType>::RR
+Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::RR
 (
     const label i
 ) const
@@ -105,7 +105,7 @@ Foam::StandardChemistryModel<ReactionThermo, ThermoType>::RR
 
 template<class ReactionThermo, class ThermoType>
 Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
-Foam::StandardChemistryModel<ReactionThermo, ThermoType>::RR
+Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::RR
 (
     const label i
 )
