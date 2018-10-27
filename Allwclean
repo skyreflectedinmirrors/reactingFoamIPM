@@ -2,7 +2,8 @@
 cd ${0%/*} || exit 1    # Run from this directory
 
 # Compile supporting libraries
-wclean StandardChemistryModelIPM
+wclean BatchedODE
+wclean chemistryModelsIPM
 wclean combustionModelsIPM
 wclean .
 

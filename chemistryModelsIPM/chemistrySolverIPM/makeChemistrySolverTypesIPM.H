@@ -29,6 +29,7 @@ License
 #include "chemistrySolver.H"
 
 #include "StandardChemistryModelIPM.H"
+#include "BatchedChemistryModelIPM.H"
 
 #include "noChemistrySolver.H"
 #include "EulerImplicit.H"
@@ -37,7 +38,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeChemistrySolverTypeIPM(SS, Comp, Thermo)                              \
+#define makeChemistrySolverTypeIPM(SS, Comp, Thermo)                           \
                                                                                \
     typedef SS<StandardChemistryModelIPM<Comp, Thermo>> SS##Comp##Thermo;      \
                                                                                \
@@ -45,6 +46,21 @@ License
     (                                                                          \
         SS##Comp##Thermo,                                                      \
         (#SS"<" + word(StandardChemistryModelIPM<Comp, Thermo>::typeName_()) + \
+            "<" + word(Comp::typeName_()) + "," + Thermo::typeName() + ">>"    \
+            ).c_str(),                                                         \
+        0                                                                      \
+    );                                                                         \
+                                                                               \
+    BasicChemistryModel<Comp>::                                                \
+        add##thermo##ConstructorToTable<SS##Comp##Thermo>                      \
+        add##SS##Comp##Thermo##thermo##ConstructorTo##BasicChemistryModel##Comp\
+##Table_;                                                                      \
+    typedef SS<BatchedChemistryModelIPM<Comp, Thermo>> SS##Comp##Thermo;       \
+                                                                               \
+    defineTemplateTypeNameAndDebugWithName                                     \
+    (                                                                          \
+        SS##Comp##Thermo,                                                      \
+        (#SS"<" + word(BatchedChemistryModelIPM<Comp, Thermo>::typeName_()) +  \
             "<" + word(Comp::typeName_()) + "," + Thermo::typeName() + ">>"    \
             ).c_str(),                                                         \
         0                                                                      \

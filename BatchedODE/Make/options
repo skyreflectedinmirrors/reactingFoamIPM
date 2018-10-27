@@ -1,0 +1,12 @@
+sinclude $(GENERAL_RULES)/mplib$(WM_MPLIB)
+sinclude $(RULES)/mplib$(WM_MPLIB)
+
+EXE_INC = \
+    -I$(LIB_SRC)/BatchedODE/BatchedODESystem/ \
+    $(PFLAGS) \
+    $(PINC)
+
+LIB_LIBS = \
+    -lODE \
+    -L$(IPM_LIBPATH) \
+    -lipm

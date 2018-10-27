@@ -36,6 +36,7 @@ SourceFiles
 #define BatchedODESolver_H
 
 #include "BatchedODESystem.H"
+#include "UniformField.H"
 #include "typeInfo.H"
 #include "autoPtr.H"
 
@@ -144,6 +145,12 @@ public:
 
         //- Resize the ODE solver
         virtual bool resize() = 0;
+
+        template<class Type>
+        static inline void resizeField(UList<Type>& f, const label n);
+
+        template<class Type>
+        inline void resizeField(UList<Type>& f) const;
 
         //- Solve num problems up to deltaT
         virtual void integrate

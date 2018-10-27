@@ -17,7 +17,8 @@ cd ${0%/*} || exit 1    # Run from this directory
 }
 
 # Compile supporting libraries
-wmake StandardChemistryModelIPM
+wmake BatchedODE
+wmake chemistryModelsIPM
 wmake combustionModelsIPM
 wmake .
 

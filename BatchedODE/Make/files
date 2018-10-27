@@ -1,0 +1,4 @@
+BatchedODESolver/BatchedODESolver.C
+BatchedODESolver/BatchedODESolverNew.C
+
+LIB = $(FOAM_LIBBIN)/libBatchedODE

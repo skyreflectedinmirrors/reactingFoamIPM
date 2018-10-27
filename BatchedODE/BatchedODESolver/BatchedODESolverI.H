@@ -43,6 +43,19 @@ inline Foam::scalarField& Foam::BatchedODESolver::relTol()
     return relTol_;
 }
 
+template<class Type>
+inline void Foam::BatchedODESolver::resizeField(UList<Type>& f, const label n)
+{
+    f.shallowCopy(UList<Type>(f.begin(), n));
+}
+
+
+template<class Type>
+inline void Foam::BatchedODESolver::resizeField(UList<Type>& f) const
+{
+    resizeField(f, n_);
+}
+
 
 
 // ************************************************************************* //
