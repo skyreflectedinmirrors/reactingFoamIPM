@@ -23,31 +23,30 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ode.H"
+#include "batched.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ChemistryModel>
-Foam::ode<ChemistryModel>::batchedODE(typename ChemistryModel::reactionThermo& thermo)
+Foam::batched<ChemistryModel>::batched(typename ChemistryModel::reactionThermo& thermo)
 :
-    chemistrySolver<ChemistryModel>(thermo),
+    ChemistryModel(thermo),
     coeffsDict_(this->subDict("odeCoeffs")),
-    odeSolver_(BatchedODESolver::New(*this, coeffsDict_)),
-    cTp_(this->nEqns())
+    odeSolver_(BatchedODESolver::New(*this, coeffsDict_))
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class ChemistryModel>
-Foam::ode<ChemistryModel>::~batchedODE()
+Foam::batched<ChemistryModel>::~batched()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ChemistryModel>
-void Foam::ode<ChemistryModel>::integrate
+void Foam::batched<ChemistryModel>::integrate
 (
     label num,
     const scalarField& deltaT,
@@ -55,18 +54,18 @@ void Foam::ode<ChemistryModel>::integrate
     const scalarField& p
 ) const
 {
-    // Reset the size of the ODE system to the simplified size when mechanism
+    // Reset the size of the batched system to the simplified size when mechanism
     // reduction is active
     if (odeSolver_->resize())
     {
         NotImplemented;
     }
 
-    odeSolver_->solve(num, deltaT, phi, p);
+    odeSolver_->integrate(num, deltaT, phi, p);
 }
 
 template<class ChemistryModel>
-void Foam::ode<ChemistryModel>::integrate
+void Foam::batched<ChemistryModel>::integrate
 (
     label num,
     const UniformField<scalar>& deltaT,
@@ -74,14 +73,14 @@ void Foam::ode<ChemistryModel>::integrate
     const scalarField& p
 ) const
 {
-    // Reset the size of the ODE system to the simplified size when mechanism
+    // Reset the size of the batched system to the simplified size when mechanism
     // reduction is active
     if (odeSolver_->resize())
     {
         NotImplemented;
     }
 
-    odeSolver_->solve(num, deltaT, phi, p);
+    odeSolver_->integrate(num, deltaT, phi, p);
 }
 
 

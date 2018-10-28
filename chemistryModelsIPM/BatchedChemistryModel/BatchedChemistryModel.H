@@ -75,6 +75,33 @@ class BatchedChemistryModel
         //- Disallow default bitwise assignment
         void operator=(const BatchedChemistryModel&);
 
+        //- Initialization of the time vector
+        scalarField initTime(const label size, const scalarField& times);
+
+        //- Initialization of the time field
+        UniformField<scalar> initTime
+        (
+            const label size,
+            const UniformField<scalar>& times
+        );
+
+        //- Set element of the time vector
+        void setTime
+        (
+            const scalarField& dt,
+            scalarField& dt_out,
+            label celli,
+            label count
+        );
+
+        //- Dummy set element of the time-field
+        void setTime
+        (
+            const UniformField<scalar>& dt,
+            UniformField<scalar>& dt_out,
+            label celli,
+            label count
+        );
 
 protected:
 
@@ -109,37 +136,6 @@ protected:
         //- Write access to chemical source terms
         //  (e.g. for multi-chemistry model)
         inline PtrList<volScalarField::Internal>& RR();
-
-        // time setters / inits
-        void initTime
-        (
-            const label size,
-            const scalarField& times,
-            scalarField& out_times
-        );
-
-        void initTime
-        (
-            const label size,
-            const UniformField<scalar>& times,
-            UniformField<scalar>& out_times
-        );
-
-        void setTime
-        (
-            const scalarField& dt,
-            scalarField& dt_out,
-            label celli,
-            label count
-        );
-
-        void setTime
-        (
-            const scalarField& dt,
-            UniformField<scalar>& dt_out,
-            label celli,
-            label count
-        );
 
 
 public:
@@ -219,7 +215,7 @@ public:
                 const scalarField& deltaT,
                 scalarField& phi,
                 const scalarField& p
-            ) = 0;
+            ) const = 0;
 
             //- Interface to the Batched ODE integrator
             virtual void integrate
@@ -228,7 +224,7 @@ public:
                 const UniformField<scalar>& deltaT,
                 scalarField& phi,
                 const scalarField& p
-            ) = 0;
+            ) const = 0;
 
             //- Return the chemical time scale
             virtual tmp<volScalarField> tc() const;

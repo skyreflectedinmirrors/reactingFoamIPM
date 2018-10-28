@@ -55,11 +55,15 @@ License
         add##thermo##ConstructorToTable<SS##Comp##Thermo>                      \
         add##SS##Comp##Thermo##thermo##ConstructorTo##BasicChemistryModel##Comp\
 ##Table_;                                                                      \
-    typedef SS<BatchedChemistryModelIPM<Comp, Thermo>> SS##Comp##Thermo;       \
+
+#define makeBatchedChemistrySolverTypeIPM(SS, Comp, Thermo)                    \
+                                                                               \
+    typedef SS<BatchedChemistryModelIPM<Comp, Thermo>> Batched##SS##Comp       \
+##Thermo;                                                                      \
                                                                                \
     defineTemplateTypeNameAndDebugWithName                                     \
     (                                                                          \
-        SS##Comp##Thermo,                                                      \
+        Batched##SS##Comp##Thermo,                                             \
         (#SS"<" + word(BatchedChemistryModelIPM<Comp, Thermo>::typeName_()) +  \
             "<" + word(Comp::typeName_()) + "," + Thermo::typeName() + ">>"    \
             ).c_str(),                                                         \
@@ -67,9 +71,9 @@ License
     );                                                                         \
                                                                                \
     BasicChemistryModel<Comp>::                                                \
-        add##thermo##ConstructorToTable<SS##Comp##Thermo>                      \
-        add##SS##Comp##Thermo##thermo##ConstructorTo##BasicChemistryModel##Comp\
-##Table_;
+        add##thermo##ConstructorToTable<Batched##SS##Comp##Thermo>             \
+        add##Batched##SS##Comp##Thermo##thermo##ConstructorTo##                \
+        BasicChemistryModel##Comp##Table_;
 
 
 #define makeChemistrySolverTypesIPM(Comp, Thermo)                              \
@@ -94,7 +98,8 @@ License
         Comp,                                                                  \
         Thermo                                                                 \
     );                                                                         \
-    makeChemistrySolverTypeIPM                                                 \
+                                                                               \
+    makeBatchedChemistrySolverTypeIPM                                          \
     (                                                                          \
         batched,                                                               \
         Comp,                                                                  \

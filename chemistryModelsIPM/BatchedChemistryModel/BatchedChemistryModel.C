@@ -207,7 +207,6 @@ void Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::calculate()
     NotImplemented;
 }
 
-
 template<class ReactionThermo, class ThermoType>
 void Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::setTime
 (
@@ -223,7 +222,7 @@ void Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::setTime
 template<class ReactionThermo, class ThermoType>
 void Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::setTime
 (
-    const scalarField& dt,
+    const UniformField<scalar>& dt,
     UniformField<scalar>& dt_out,
     label celli,
     label count
@@ -233,27 +232,25 @@ void Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::setTime
 }
 
 template<class ReactionThermo, class ThermoType>
-void Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::initTime
+Foam::scalarField Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::initTime
 (
     const label size,
-    const scalarField& times,
-    scalarField& out_times
+    const scalarField& times
 )
 {
-    out_times = scalarField(size);
+    return scalarField(size);
 }
 
 template<class ReactionThermo, class ThermoType>
-void Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::initTime
+Foam::UniformField<Foam::scalar>
+Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::initTime
 (
     const label size,
-    const UniformField<scalar>& times,
-    UniformField<scalar>& out_times
+    const UniformField<scalar>& times
 )
 {
-    out_times = UniformField<scalar>(times[0]);
+    return UniformField<scalar>(times[0]);
 }
-
 
 
 template<class ReactionThermo, class ThermoType>
@@ -280,8 +277,7 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
 
     scalarField c0(nSpecie_ * rho.size());
     scalarField phi((nSpecie_ + 1) * rho.size());
-    DeltaTType dt;
-    initTime(rho.size(), deltaT, dt);
+    DeltaTType dt = initTime(rho.size(), deltaT);
     labelField integrationMask(rho.size());
     label count = 0;
 

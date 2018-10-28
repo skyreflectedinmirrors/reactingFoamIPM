@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::batchedODE
+    Foam::batched
 
 Description
     An batch-evaluated ODE solver for chemistry
@@ -35,7 +35,6 @@ SourceFiles
 #ifndef batched_H
 #define batched_H
 
-#include "chemistrySolver.H"
 #include "BatchedODESolver.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -44,13 +43,13 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                            Class batchedODE Declaration
+                            Class batched Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class ChemistryModel>
-class batchedODE
+class batched
 :
-    public chemistrySolver<ChemistryModel>
+    public ChemistryModel
 {
     // Private data
 
@@ -69,11 +68,11 @@ public:
     // Constructors
 
         //- Construct from thermo
-        batchedODE(typename ChemistryModel::reactionThermo& thermo);
+        batched(typename ChemistryModel::reactionThermo& thermo);
 
 
     //- Destructor
-    virtual ~batchedODE();
+    virtual ~batched();
 
 
     // Member Functions
@@ -85,7 +84,7 @@ public:
             const scalarField& deltaT,
             scalarField& phi,
             const scalarField& p
-        );
+        ) const;
 
         //- Interface to the Batched ODE integrator
         virtual void integrate
@@ -94,7 +93,7 @@ public:
             const UniformField<scalar>& deltaT,
             scalarField& phi,
             const scalarField& p
-        );
+        ) const;
 };
 
 

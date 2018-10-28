@@ -159,7 +159,7 @@ public:
             const scalarField& deltaT,
             scalarField& phi,
             const scalarField& p
-        ) = 0;
+        ) const = 0;
 
         //- Solve num problems up to deltaT
         virtual void integrate
@@ -168,7 +168,7 @@ public:
             const UniformField<scalar>& deltaT,
             scalarField& phi,
             const scalarField& p
-        ) = 0;
+        ) const = 0;
 };
 
 
