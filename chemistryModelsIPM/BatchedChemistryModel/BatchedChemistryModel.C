@@ -321,8 +321,8 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
     {
         if (integrationMask[celli] >= 0)
         {
-            const scalar Vinv = 1.0 / phi[mask * nSpecie_ + i + 1]
             const label mask = integrationMask[celli];
+            const scalar Vinv = 1.0 / phi[mask * nSpecie_ + 1]
             for (label i=0; i<nSpecie_; i++)
             {
                 RR_[i][celli] =
