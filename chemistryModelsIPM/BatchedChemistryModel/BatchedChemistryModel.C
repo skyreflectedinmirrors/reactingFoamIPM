@@ -321,11 +321,12 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
     {
         if (integrationMask[celli] >= 0)
         {
+            const scalar Vinv = 1.0 / phi[mask * nSpecie_ + i + 1]
             const label mask = integrationMask[celli];
             for (label i=0; i<nSpecie_; i++)
             {
                 RR_[i][celli] =
-                    (max(phi[concIndex(mask, i)], 0.0) - c0[i])*specieThermo_[i].W()/deltaT[celli];
+                    (max(Vinv * phi[concIndex(mask, i)], 0.0) - c0[i])*specieThermo_[i].W()/deltaT[celli];
             }
         }
         else
@@ -336,6 +337,8 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
             }
         }
     }
+
+    #undef concIndex
 
     return deltaTMin;
 }
