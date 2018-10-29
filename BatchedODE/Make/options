@@ -2,11 +2,23 @@ sinclude $(GENERAL_RULES)/mplib$(WM_MPLIB)
 sinclude $(RULES)/mplib$(WM_MPLIB)
 
 EXE_INC = \
+    -I$(ACCELERINT_PATH)/interface/opencl \
+    -I$(ACCELERINT_PATH)/generic/opencl \
+    -I$(ACCELERINT_PATH)/paths \
+    -I$(PYJAC_PATH) \
     -I$(LIB_SRC)/BatchedODE/BatchedODESystem/ \
+    -DPYJAC_PATH=$(PYJAC_PATH) \
     $(PFLAGS) \
     $(PINC)
 
 LIB_LIBS = \
     -lODE \
+    -L$(ACCELERINT_LIB_PATH) \
+    -Wl,-rpath,$(ACCELERINT_LIB_PATH) \
+    -laccelerint_opencl \
+    -laccelerint_problem_opencl \
+    -L$(PYJAC_LIB_PATH) \
+    -Wl,-rpath,$(PYJAC_LIB_PATH) \
+    -locl_pyjac \
     -L$(IPM_LIBPATH) \
     -lipm

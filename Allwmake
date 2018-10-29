@@ -10,6 +10,30 @@ cd ${0%/*} || exit 1    # Run from this directory
     exit 1
 }
 
+[ -n "$ACCELERINT_PATH" ] || {
+    echo "Allwmake error: ACCELERINT_PATH not set"
+    echo "    Set this environment variable to enable proper compilation"
+    exit 1
+}
+
+[ -n "$ACCELERINT_LIB_PATH" ] || {
+    echo "Allwmake error: ACCELERINT_LIB_PATH not set"
+    echo "    Set this environment variable to enable proper compilation"
+    exit 1
+}
+
+[ -n "$PYJAC_PATH" ] || {
+    echo "Allwmake error: PYJAC_PATH not set"
+    echo "    Set this environment variable to enable proper compilation"
+    exit 1
+}
+
+[ -n "$PYJAC_LIB_PATH" ] || {
+    echo "Allwmake error: PYJAC_LIB_PATH not set"
+    echo "    Set this environment variable to enable proper compilation"
+    exit 1
+}
+
 [ -n "$FOAM_EXT_LIBBIN" ] || {
     echo "Allwmake error: FOAM_EXT_LIBBIN not set"
     echo "    Check the OpenFOAM entries in your dot-files and source them."
