@@ -22,5 +22,5 @@ EXE_LIBS = \
     -lchemistryModelIPM \
     -lODE \
     -lBatchedODE \
-    L$(IPM_LIBPATH) \
+    -L$(IPM_LIBPATH) \
     -lipm
