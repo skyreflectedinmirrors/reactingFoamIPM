@@ -338,9 +338,9 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
                 cNs -= ci;
             }
             // and set last species reaction rate
-            RR_[nSpecie_][mask] =
+            RR_[nSpecie_ - 1][mask] =
                 (cNs - c0[concIndex(mask, nSpecie_ - 1)])*
-                specieThermo_[nSpecie_ -1].W() / deltaT[mask];
+                specieThermo_[nSpecie_ - 1].W() / deltaT[mask];
         }
         else
         {
