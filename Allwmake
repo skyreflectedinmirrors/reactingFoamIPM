@@ -57,6 +57,6 @@ wmake BatchedODE
 wmake chemistryModelsIPM
 wmake combustionModelsIPM
 wmake reactingFoamIPM
-wmak  chemFoamIPM
+wmake chemFoamIPM
 
 #------------------------------------------------------------------------------
