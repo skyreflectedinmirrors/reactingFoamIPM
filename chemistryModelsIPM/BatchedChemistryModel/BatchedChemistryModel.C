@@ -272,7 +272,7 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
     tmp<volScalarField> trho(this->thermo().rho());
     const scalarField& rho = trho();
 
-    const scalarField& T = this->thermo().T();
+    scalarField& T = this->thermo().T();
     const scalarField& p = this->thermo().p();
 
     scalarField c0(nSpecie_ * rho.size());
