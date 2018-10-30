@@ -6,7 +6,7 @@ EXE_INC = \
     -I$(ACCELERINT_PATH)/generic/opencl \
     -I$(ACCELERINT_PATH)/paths \
     -I$(PYJAC_PATH) \
-    -I$(LIB_SRC)/BatchedODE/BatchedODESystem/ \
+    -I$(WRAPPER_PATH)/BatchedODE/BatchedODESystem/ \
     -I$(CL_INC_DIR) \
     -DPYJAC_PATH=$(PYJAC_PATH) \
     -DWRAPPER_PATH=$(WRAPPER_PATH) \
