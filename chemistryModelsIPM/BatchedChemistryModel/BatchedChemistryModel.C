@@ -341,6 +341,8 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
             RR_[nSpecie_ - 1][mask] =
                 (cNs - c0[concIndex(mask, nSpecie_ - 1)])*
                 specieThermo_[nSpecie_ - 1].W() / deltaT[mask];
+            // finally copy back the new temperature
+            T[mask] = phi[(nSpecie_ + 1) * mask];
         }
         else
         {
