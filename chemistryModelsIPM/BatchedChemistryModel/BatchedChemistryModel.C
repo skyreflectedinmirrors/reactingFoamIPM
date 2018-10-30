@@ -332,9 +332,9 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
             scalar cNs = p[mask] / (8314.4621 * phi[(nSpecie_ + 1) * mask]);
             for (label i=0; i<nSpecie_ - 1; i++)
             {
-                scalar ci = max(Vinv * phi[concIndexACC(mask, i)], 0.0);
+                scalar ci = Vinv * phi[concIndexACC(mask, i)];
                 RR_[i][mask] =
-                    (ci - c0[concIndex(mask, i)])*specieThermo_[i].W()/deltaT[mask];
+                    (max(ci, 0.0) - c0[concIndex(mask, i)])*specieThermo_[i].W()/deltaT[mask];
                 cNs -= ci;
             }
             // and set last species reaction rate
