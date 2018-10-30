@@ -323,10 +323,16 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
         {
             const label mask = integrationMask[celli];
             const scalar Vinv = 1.0 / phi[mask * nSpecie_ + 1];
-            for (label i=0; i<nSpecie_; i++)
+            // determine concentration of last species from the others
+            // C = sum(C[i], i=1...Ns) = P / RT
+            //      -> C[Ns] = (P / RT) - sum(C[i], i=1...Ns-1)
+            scalar cNs = p[mask] / (8314.4621 * phi[(nSpecie_ + 1) * mask]);
+            for (label i=0; i<nSpecie_ - 1; i++)
             {
-                RR_[i][celli] =
-                    (max(Vinv * phi[concIndex(mask, i)], 0.0) - c0[i])*specieThermo_[i].W()/deltaT[celli];
+                scalar ci = max(Vinv * phi[concIndex(mask, i)], 0.0);
+                RR_[i][mask] =
+                    (ci - c0[i])*specieThermo_[i].W()/deltaT[mask];
+                cNs -= ci;
             }
         }
         else
