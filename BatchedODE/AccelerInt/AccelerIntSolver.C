@@ -35,6 +35,9 @@ namespace Foam
 }
 
 
+#define xstringify(s) (stringify(s))
+#define stringify(s) (#s)
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::AccelerIntSolver::AccelerIntSolver(const BatchedODESystem& ode, const dictionary& dict)
@@ -46,10 +49,9 @@ Foam::AccelerIntSolver::AccelerIntSolver(const BatchedODESystem& ode, const dict
     vectorSize_(checkVectorSize(dict.lookupOrDefault<label>("vectorSize", 0))),
     blockSize_(checkBlockSize(dict.lookupOrDefault<label>("blockSize", 0))),
     order_("C"),
-    pyjac_path_("PYJAC_PATH"), // rely on pre-processor define for now
-    our_path_(filesystem::path(__FILE__).make_absolute().parent_path().str())
+    pyjac_path_(xstringify(PYJAC_PATH)),
+    our_path_(xstringify(WRAPPER_PATH))
 {
-
     if (vectorSize_ && blockSize_)
     {
         FatalErrorInFunction
@@ -148,7 +150,6 @@ void Foam::AccelerIntSolver::integrate
 
 bool Foam::AccelerIntSolver::resize()
 {
-    NotImplemented;
     return false;
 }
 

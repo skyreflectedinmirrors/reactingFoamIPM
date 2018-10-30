@@ -9,6 +9,7 @@ EXE_INC = \
     -I$(LIB_SRC)/BatchedODE/BatchedODESystem/ \
     -I$(CL_INC_DIR) \
     -DPYJAC_PATH=$(PYJAC_PATH) \
+    -DWRAPPER_PATH=$(WRAPPER_PATH) \
     $(PFLAGS) \
     $(PINC)
 

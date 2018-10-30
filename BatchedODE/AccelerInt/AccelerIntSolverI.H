@@ -89,13 +89,13 @@ inline opencl_solvers::DeviceType Foam::AccelerIntSolver::deviceType
     const Foam::word deviceType_
 ) const
 {
-    if (accSolver_.match("CPU"))
+    if (deviceType_.match("CPU"))
         return opencl_solvers::DeviceType::CPU;
-    else if (accSolver_.match("GPU"))
+    else if (deviceType_.match("GPU"))
         return opencl_solvers::DeviceType::GPU;
-    else if (accSolver_.match("ACCELERATOR"))
+    else if (deviceType_.match("ACCELERATOR"))
         return opencl_solvers::DeviceType::ACCELERATOR;
-    else if (accSolver_.match("DEFAULT"))
+    else if (deviceType_.match("DEFAULT"))
         return opencl_solvers::DeviceType::DEFAULT;
     FatalErrorInFunction
         << "DeviceType " << deviceType_ << " not recognized. "

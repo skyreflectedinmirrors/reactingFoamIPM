@@ -34,6 +34,12 @@ cd ${0%/*} || exit 1    # Run from this directory
     exit 1
 }
 
+[ -n "$WRAPPER_PATH" ] || {
+    echo "Allwmake error: WRAPPER_PATH not set"
+    echo "    Set this environment variable to enable proper compilation"
+    exit 1
+}
+
 [ -n "$CL_INC_DIR" ] || {
     echo "Allwmake error: CL_INC_DIR not set"
     echo "    Set this environment variable to enable proper compilation"
