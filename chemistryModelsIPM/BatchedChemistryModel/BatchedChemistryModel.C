@@ -281,7 +281,8 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
     labelField integrationMask(rho.size());
     label count = 0;
 
-    #define concIndex(count, i) ((nSpecie_ + 1) * (count) + (i) + 2)
+    #define concIndexACC(count, i) ((nSpecie_ + 1) * (count) + (i) + 2)
+    #define concIndex(count, i) ((nSpecie_) * count + i)
 
     forAll(rho, celli)
     {
@@ -298,9 +299,11 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
             // convert mass fractions to concentrations
             for (label i=0; i<nSpecie_ - 1; i++)
             {
-                phi[concIndex(count, i)] = rhoi*Y_[i][celli]/specieThermo_[i].W();
-                c0[count * nSpecie_ + i] = phi[concIndex(count, i)];
+                phi[concIndexACC(count, i)] = rhoi*Y_[i][celli]/specieThermo_[i].W();
+                c0[concIndex(count, i)] = phi[concIndexACC(count, i)];
             }
+            c0[concIndex(count, nSpecie_ - 1)] =
+                rhoi*Y_[nSpecie_ - 1][celli]/specieThermo_[nSpecie_ - 1].W();
 
             // Initialise time progress
             setTime(deltaT, dt, celli, count);
@@ -329,11 +332,15 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
             scalar cNs = p[mask] / (8314.4621 * phi[(nSpecie_ + 1) * mask]);
             for (label i=0; i<nSpecie_ - 1; i++)
             {
-                scalar ci = max(Vinv * phi[concIndex(mask, i)], 0.0);
+                scalar ci = max(Vinv * phi[concIndexACC(mask, i)], 0.0);
                 RR_[i][mask] =
-                    (ci - c0[i])*specieThermo_[i].W()/deltaT[mask];
+                    (ci - c0[concIndex(mask, i)])*specieThermo_[i].W()/deltaT[mask];
                 cNs -= ci;
             }
+            // and set last species reaction rate
+            RR_[nSpecie_][mask] =
+                (cNs - c0[concIndex(mask, nSpecie_ - 1)])*
+                specieThermo_[nSpecie_ -1].W() / deltaT[mask];
         }
         else
         {
@@ -345,6 +352,7 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
     }
 
     #undef concIndex
+    #undef concIndexACC
 
     return deltaTMin;
 }
