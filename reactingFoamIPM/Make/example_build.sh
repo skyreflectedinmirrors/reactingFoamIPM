@@ -1,1 +1,0 @@
-WRAPPER_PATH=`pwd`/BatchedODE/AccelerInt/ CL_INC_DIR=/opt/opencl-headers/ PYJAC_PATH=`pwd`/pyjac/ PYJAC_LIB_PATH=`pwd`/pyjac_lib/ ACCELERINT_PATH=~/accelerInt-test/ ACCELERINT_LIB_PATH=`pwd`/accelerint_lib/ ./Allwmake
