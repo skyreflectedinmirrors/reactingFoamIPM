@@ -75,34 +75,6 @@ class BatchedChemistryModel
         //- Disallow default bitwise assignment
         void operator=(const BatchedChemistryModel&);
 
-        //- Initialization of the time vector
-        scalarField initTime(const label size, const scalarField& times);
-
-        //- Initialization of the time field
-        UniformField<scalar> initTime
-        (
-            const label size,
-            const UniformField<scalar>& times
-        );
-
-        //- Set element of the time vector
-        void setTime
-        (
-            const scalarField& dt,
-            scalarField& dt_out,
-            label celli,
-            label count
-        );
-
-        //- Dummy set element of the time-field
-        void setTime
-        (
-            const UniformField<scalar>& dt,
-            UniformField<scalar>& dt_out,
-            label celli,
-            label count
-        );
-
 protected:
 
     typedef ThermoType thermoType;
@@ -130,6 +102,21 @@ protected:
 
         //- List of reaction rate per specie [kg/m3/s]
         PtrList<volScalarField::Internal> RR_;
+
+        //- State vector storage [T, V, n0, n1, ...]
+        scalarField phi;
+
+        //- Initial state vector storage [T_0, V_0, n0_0, n1_0, ...]
+        scalarField phi0;
+
+        //- Chemical time-step storage
+        scalarField deltaTChem;
+
+        //- Mask to filter active integration cells
+        labelField integrationMask;
+
+        //- Time-step vector for ODE solver
+        scalarField dt;
 
     // Protected Member Functions
 

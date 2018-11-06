@@ -60,6 +60,15 @@ Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::BatchedChemistryModel
     ),
     RR_(nSpecie_)
 {
+    // get rho to get size
+    tmp<volScalarField> trho(this->thermo().rho());
+    const label size = trho().size();
+    deltaTChem = scalarField(size);
+    phi0 = scalarField(nEqns() * size);
+    phi = scalarField(nEqns() * size);
+    integrationMask = labelField(size);
+    dt = scalarField(size);
+
     // Create the fields for the chemistry sources
     forAll(RR_, fieldi)
     {
@@ -207,51 +216,6 @@ void Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::calculate()
     NotImplemented;
 }
 
-template<class ReactionThermo, class ThermoType>
-void Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::setTime
-(
-    const scalarField& dt,
-    scalarField& dt_out,
-    label celli,
-    label count
-)
-{
-    dt_out[count] = dt[celli];
-}
-
-template<class ReactionThermo, class ThermoType>
-void Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::setTime
-(
-    const UniformField<scalar>& dt,
-    UniformField<scalar>& dt_out,
-    label celli,
-    label count
-)
-{
-
-}
-
-template<class ReactionThermo, class ThermoType>
-Foam::scalarField Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::initTime
-(
-    const label size,
-    const scalarField& times
-)
-{
-    return scalarField(size);
-}
-
-template<class ReactionThermo, class ThermoType>
-Foam::UniformField<Foam::scalar>
-Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::initTime
-(
-    const label size,
-    const UniformField<scalar>& times
-)
-{
-    return UniformField<scalar>(times[0]);
-}
-
 #include "thermodynamicConstants.H"
 
 template<class ReactionThermo, class ThermoType>
@@ -276,11 +240,6 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
     const scalarField& T = this->thermo().T();
     const scalarField& p = this->thermo().p();
 
-    scalarField deltaTChem(rho.size());
-    scalarField phi0(nEqns() * rho.size());
-    scalarField phi(nEqns() * rho.size());
-    DeltaTType dt = initTime(rho.size(), deltaT);
-    labelField integrationMask(rho.size());
     label count = 0;
 
     #define TIndex(count) (nEqns() * (count))
@@ -299,7 +258,6 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
             phi[TIndex(count)] = Ti;
             // store 'volume'
             phi[VIndex(count)] = Vi;
-            phi0[VIndex(count)] = Vi;
 
             // convert mass fractions to moles
             for (label i=0; i<nSpecie_ - 1; i++)
@@ -309,7 +267,7 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
             }
 
             // Initialise time progress
-            setTime(deltaT, dt, celli, count);
+            dt[count] = deltaT[celli];
 
             // and store mask
             integrationMask[celli] = count++;
@@ -329,8 +287,6 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
         {
             const label mask = integrationMask[celli];
             const scalar dtinv = 1.0 / deltaT[mask];
-            const scalar V0inv = 1.0 / phi0[VIndex(mask)];
-            const scalar Vinv = 1.0 / phi[VIndex(mask)];
             const scalar Winv = 1.0 / specieThermo_[nSpecie_ - 1].W();
             scalar dNsdt = 0;
             // determine rate of change of moles of last species from the others
