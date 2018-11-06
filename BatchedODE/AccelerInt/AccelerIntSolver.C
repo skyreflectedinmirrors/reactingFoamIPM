@@ -130,10 +130,11 @@ void Foam::AccelerIntSolver::integrate
     scalarField& dtChem
 ) const
 {
-    opencl_solvers::integrate_varying(
-        *_integrator.get(), num, 0,
-        &deltaT[0], -1, &phi[0], &p[0],
-        &dtChem[0]);
+    if (num > 0)
+        opencl_solvers::integrate_varying(
+            *_integrator.get(), num, 0,
+            &deltaT[0], -1, &phi[0], &p[0],
+            &dtChem[0]);
 }
 
 //- Solve num problems up to deltaT
@@ -146,10 +147,11 @@ void Foam::AccelerIntSolver::integrate
     scalarField& dtChem
 ) const
 {
-    opencl_solvers::integrate(
-        *_integrator.get(), num, 0,
-        deltaT[0], -1, &phi[0], &p[0],
-        &dtChem[0]);
+    if (num > 0)
+        opencl_solvers::integrate(
+            *_integrator.get(), num, 0,
+            deltaT[0], -1, &phi[0], &p[0],
+            &dtChem[0]);
 }
 
 
