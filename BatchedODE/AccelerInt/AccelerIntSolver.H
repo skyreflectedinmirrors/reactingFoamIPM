@@ -105,7 +105,8 @@ public:
             label num,
             const scalarField& deltaT,
             scalarField& phi,
-            const scalarField& p
+            const scalarField& p,
+            scalarField& dtChem
         ) const;
 
         //- Solve num problems up to deltaT
@@ -114,7 +115,8 @@ public:
             label num,
             const UniformField<scalar>& deltaT,
             scalarField& phi,
-            const scalarField& p
+            const scalarField& p,
+            scalarField& dtChem
         ) const;
 
         //- Resize the ODE solver

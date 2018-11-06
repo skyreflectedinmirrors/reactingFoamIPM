@@ -83,7 +83,8 @@ public:
             label num,
             const scalarField& deltaT,
             scalarField& phi,
-            const scalarField& p
+            const scalarField& p,
+            scalarField& dtChem
         ) const;
 
         //- Interface to the Batched ODE integrator
@@ -92,7 +93,8 @@ public:
             label num,
             const UniformField<scalar>& deltaT,
             scalarField& phi,
-            const scalarField& p
+            const scalarField& p,
+            scalarField& dtChem
         ) const;
 };
 

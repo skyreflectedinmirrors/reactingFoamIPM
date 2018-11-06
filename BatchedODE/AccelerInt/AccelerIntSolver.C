@@ -72,7 +72,10 @@ Foam::AccelerIntSolver::AccelerIntSolver(const BatchedODESystem& ode, const dict
                                                      absTol_[0], relTol_[0],
                                                      false, true, order_,
                                                      platform_, device_type,
-                                                     1, maxSteps_));
+                                                     1, maxSteps_,
+                                                     opencl_solvers::StepperType::ADAPTIVE,
+                                                     std::numeric_limits<double>::quiet_NaN(),
+                                                     true));
     // build paths to files
     filesystem::path _p(our_path_);
     filesystem::path _pj(pyjac_path_);
@@ -123,12 +126,14 @@ void Foam::AccelerIntSolver::integrate
     label num,
     const scalarField& deltaT,
     scalarField& phi,
-    const scalarField& p
+    const scalarField& p,
+    scalarField& dtChem
 ) const
 {
     opencl_solvers::integrate_varying(
         *_integrator.get(), num, 0,
-        &deltaT[0], -1, &phi[0], &p[0]);
+        &deltaT[0], -1, &phi[0], &p[0],
+        &dtChem[0]);
 }
 
 //- Solve num problems up to deltaT
@@ -137,12 +142,14 @@ void Foam::AccelerIntSolver::integrate
     label num,
     const UniformField<scalar>& deltaT,
     scalarField& phi,
-    const scalarField& p
+    const scalarField& p,
+    scalarField& dtChem
 ) const
 {
     opencl_solvers::integrate(
         *_integrator.get(), num, 0,
-        deltaT[0], -1, &phi[0], &p[0]);
+        deltaT[0], -1, &phi[0], &p[0],
+        &dtChem[0]);
 }
 
 

@@ -158,7 +158,8 @@ public:
             label num,
             const scalarField& deltaT,
             scalarField& phi,
-            const scalarField& p
+            const scalarField& p,
+            scalarField& dtChem
         ) const = 0;
 
         //- Solve num problems up to deltaT
@@ -167,7 +168,8 @@ public:
             label num,
             const UniformField<scalar>& deltaT,
             scalarField& phi,
-            const scalarField& p
+            const scalarField& p,
+            scalarField& dtChem
         ) const = 0;
 };
 

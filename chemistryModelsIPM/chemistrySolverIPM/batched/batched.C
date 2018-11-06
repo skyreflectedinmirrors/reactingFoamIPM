@@ -51,7 +51,8 @@ void Foam::batched<ChemistryModel>::integrate
     label num,
     const scalarField& deltaT,
     scalarField& phi,
-    const scalarField& p
+    const scalarField& p,
+    scalarField& dtChem
 ) const
 {
     // Reset the size of the batched system to the simplified size when mechanism
@@ -61,7 +62,7 @@ void Foam::batched<ChemistryModel>::integrate
         NotImplemented;
     }
 
-    odeSolver_->integrate(num, deltaT, phi, p);
+    odeSolver_->integrate(num, deltaT, phi, p, dtChem);
 }
 
 template<class ChemistryModel>
@@ -70,7 +71,8 @@ void Foam::batched<ChemistryModel>::integrate
     label num,
     const UniformField<scalar>& deltaT,
     scalarField& phi,
-    const scalarField& p
+    const scalarField& p,
+    scalarField& dtChem
 ) const
 {
     // Reset the size of the batched system to the simplified size when mechanism
@@ -80,7 +82,7 @@ void Foam::batched<ChemistryModel>::integrate
         NotImplemented;
     }
 
-    odeSolver_->integrate(num, deltaT, phi, p);
+    odeSolver_->integrate(num, deltaT, phi, p, dtChem);
 }
 
 
