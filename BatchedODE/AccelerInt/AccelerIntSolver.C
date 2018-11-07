@@ -75,7 +75,7 @@ Foam::AccelerIntSolver::AccelerIntSolver(const BatchedODESystem& ode, const dict
                                                      1, maxSteps_,
                                                      opencl_solvers::StepperType::ADAPTIVE,
                                                      std::numeric_limits<double>::quiet_NaN(),
-                                                     true));
+                                                     true, false));
     // build paths to files
     filesystem::path _p(our_path_);
     filesystem::path _pj(pyjac_path_);
