@@ -281,19 +281,20 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
     this->integrate(count, dt, phi, p, deltaTChem);
 
 
+    const scalar Winv = 1.0 / specieThermo_[nSpecie_ - 1].W();
     forAll(rho, celli)
     {
         if (integrationMask[celli] >= 0)
         {
             const label mask = integrationMask[celli];
             const scalar dtinv = 1.0 / deltaT[mask];
-            const scalar Winv = 1.0 / specieThermo_[nSpecie_ - 1].W();
+            const scalar dVinv = 1.0 / phi[VIndex(mask)];
             scalar dNsdt = 0;
             // determine rate of change of moles of last species from the others
             for (label i=0; i<nSpecie_ - 1; i++)
             {
                 scalar ni = max(phi[concIndex(mask, i)], 0.0);
-                RR_[i][mask] = specieThermo_[i].W() * dtinv * (
+                RR_[i][mask] = specieThermo_[i].W() * dtinv * dVinv * (
                     ni - phi0[concIndex(mask, i)]);
                 dNsdt -= RR_[i][mask] * Winv;
             }
