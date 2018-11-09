@@ -25,6 +25,8 @@ License
 
 #include "AccelerIntSolver.H"
 #include "addToRunTimeSelectionTable.H"
+// include MPI header
+#include <mpi.h>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -87,7 +89,31 @@ Foam::AccelerIntSolver::AccelerIntSolver(const BatchedODESystem& ode, const dict
         (_pj/filesystem::path("chem_utils.ocl")).str()};
 
     // create pyjac kernel
-    JacobianKernel jk(1, 1);
+    int init = 0;
+    MPI_Initialized(&init);
+    JacobianKernel jk;
+
+    // avoid data-races with kernel binary
+    if (init)
+    {
+        // get rank
+        int rank;
+        MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+        if (rank == 0)
+        {
+            jk.resize(1, 1);
+        }
+        MPI_Barrier(MPI_COMM_WORLD);
+        if (rank != 0)
+        {
+            // don't recompile kernel
+            jk.resize(1, 1, true);
+        }
+    }
+    else
+    {
+        jk.resize(1, 1);
+    }
     // pyJac reports the total number of species, in order to match we should have:
     // neq == nsp - 1 + 2 for (T, V) == nsp + 1
     if (!jk.numSpecies() + 1 == n_)
