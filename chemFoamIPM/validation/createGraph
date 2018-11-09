@@ -1,0 +1,39 @@
+#!/bin/sh
+
+############################################
+#    createGraph -- a slightly modified    #
+#    form of the base chemFoam plotter     #
+#    that plots the accelerInt results     #
+#    alongside the base OpenFOAM solver.   #
+############################################
+
+# we expect:
+# 1. The base OpenFOAM chemFoam solution in the parent directory with name,
+#    chemFoam_base.out
+# 2. The accelerInt-based chemFoam solution in the parent directory with name,
+#    chemFoam.out
+# 3. The senkin / chemkin output in the usual locationZ
+
+if ! which gnuplot > /dev/null 2>&1
+then
+    echo "gnuplot not found - skipping graph creation" >&2
+    exit 1
+fi
+
+gnuplot<<EOF
+    set terminal postscript eps color enhanced "Helveicta,20"
+    set output "OF_vs_CHEMKINII.eps"
+    set xlabel "Time / [s]" font "Helveicta,24"
+    set ylabel "Temperature / [K]" font "Helveicta,24"
+    set grid
+    set key left top
+    set xrange [0:0.07]
+    set yrange [750:2750]
+    set ytic 250
+    plot \
+        "../chemFoam.out" u 1:2 t "accelerInt" with points lt 1 pt 6 ps 1.5,\
+        "../chemFoam_base.out" u 1:2 t "OpenFOAM" with points lt 1 pt 4 ps 1.5,\
+        "chemkinII" with lines title "Chemkin II" lt -1
+EOF
+
+#------------------------------------------------------------------------------
