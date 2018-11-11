@@ -296,12 +296,12 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
             for (label i=0; i<nSpecie_ - 1; i++)
             {
                 scalar ni = max(phi[concIndex(mask, i)], 0.0);
-                RR_[i][mask] = specieThermo_[i].W() * dtinv * (
+                RR_[i][celli] = specieThermo_[i].W() * dtinv * (
                     ni * dVinv - phi0[concIndex(mask, i)] * dV0inv);
-                dNsdt -= RR_[i][mask] * Winv;
+                dNsdt -= RR_[i][celli] * Winv;
             }
             // and set last species reaction rate
-            RR_[nSpecie_ - 1][mask] = dNsdt;
+            RR_[nSpecie_ - 1][celli] = dNsdt;
             // and read back deltaTChem
             this->deltaTChem_[celli] = deltaTChem[mask];
             deltaTMin = min(this->deltaTChem_[celli], deltaTMin);
