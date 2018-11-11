@@ -258,6 +258,7 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
             phi[TIndex(count)] = Ti;
             // store 'volume'
             phi[VIndex(count)] = Vi;
+            phi0[VIndex(count)] = Vi;
 
             // convert mass fractions to moles
             for (label i=0; i<nSpecie_ - 1; i++)
@@ -289,13 +290,14 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
             const label mask = integrationMask[celli];
             const scalar dtinv = 1.0 / deltaT[mask];
             const scalar dVinv = 1.0 / phi[VIndex(mask)];
+            const scalar dV0inv = 1.0 / phi0[VIndex(mask)];
             scalar dNsdt = 0;
             // determine rate of change of moles of last species from the others
             for (label i=0; i<nSpecie_ - 1; i++)
             {
                 scalar ni = max(phi[concIndex(mask, i)], 0.0);
-                RR_[i][mask] = specieThermo_[i].W() * dtinv * dVinv * (
-                    ni - phi0[concIndex(mask, i)]);
+                RR_[i][mask] = specieThermo_[i].W() * dtinv * (
+                    ni * dVinv - phi0[concIndex(mask, i)] * dV0inv);
                 dNsdt -= RR_[i][mask] * Winv;
             }
             // and set last species reaction rate
