@@ -68,6 +68,7 @@ Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::BatchedChemistryModel
     phi = scalarField(nEqns() * size);
     integrationMask = labelField(size);
     dt = scalarField(size);
+    _p = scalarField(size);
 
     // Create the fields for the chemistry sources
     forAll(RR_, fieldi)
@@ -246,6 +247,8 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
     #define VIndex(count) (nEqns() * (count) + 1)
     #define concIndex(count, i) (nEqns() * (count) + (i) + 2)
 
+    scalarField nNs0(rho.size());
+
     forAll(rho, celli)
     {
         scalar Ti = T[celli];
@@ -259,12 +262,20 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
             // store 'volume'
             phi[VIndex(count)] = Vi;
             phi0[VIndex(count)] = Vi;
+            // store pressure
+            _p[count] = p[celli];
+
+            // determine moles of last specie as:
+            //      [Cns] = PV / RT - sum([Ci], i=1...Ns-1)
+            nNs0[count] = _p[count] * Vi / (Foam::constant::thermodynamic::RR * Ti);
 
             // convert mass fractions to moles
             for (label i=0; i<nSpecie_ - 1; i++)
             {
-                phi[concIndex(count, i)] = Vi*rhoi*Y_[i][celli]/specieThermo_[i].W();
-                phi0[concIndex(count, i)] = phi[concIndex(count, i)];
+                scalar ni = Vi*rhoi*Y_[i][celli]/specieThermo_[i].W();
+                phi[concIndex(count, i)] = ni;
+                phi0[concIndex(count, i)] = ni;
+                nNs0[count] -= ni;
             }
 
             // Initialise time progress
@@ -279,10 +290,9 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
         }
     }
 
-    this->integrate(count, dt, phi, p, deltaTChem);
+    this->integrate(count, dt, phi, _p, deltaTChem);
 
 
-    const scalar Winv = 1.0 / specieThermo_[nSpecie_ - 1].W();
     forAll(rho, celli)
     {
         if (integrationMask[celli] >= 0)
@@ -290,18 +300,20 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
             const label mask = integrationMask[celli];
             const scalar dtinv = 1.0 / deltaT[mask];
             const scalar dVinv = 1.0 / phi[VIndex(mask)];
-            const scalar dV0inv = 1.0 / phi0[VIndex(mask)];
-            scalar dNsdt = 0;
-            // determine rate of change of moles of last species from the others
+            // determine moles of last specie as:
+            //      [Cns] = PV / RT - sum([Ci], i=1...Ns-1)
+            scalar nNs = _p[mask] * phi[VIndex(mask)] / (
+                Foam::constant::thermodynamic::RR * phi[TIndex(mask)]);
             for (label i=0; i<nSpecie_ - 1; i++)
             {
                 scalar ni = max(phi[concIndex(mask, i)], 0.0);
-                RR_[i][celli] = specieThermo_[i].W() * dtinv * (
-                    ni * dVinv - phi0[concIndex(mask, i)] * dV0inv);
-                dNsdt -= RR_[i][celli] * Winv;
+                RR_[i][celli] = specieThermo_[i].W() * dtinv * dVinv * (
+                    ni - phi0[concIndex(mask, i)]);
+                nNs -= ni;
             }
             // and set last species reaction rate
-            RR_[nSpecie_ - 1][celli] = dNsdt;
+            RR_[nSpecie_ - 1][celli] = specieThermo_[nSpecie_ - 1].W() * dtinv *
+                dVinv * (nNs - nNs0[mask]);
             // and read back deltaTChem
             this->deltaTChem_[celli] = deltaTChem[mask];
             deltaTMin = min(this->deltaTChem_[celli], deltaTMin);

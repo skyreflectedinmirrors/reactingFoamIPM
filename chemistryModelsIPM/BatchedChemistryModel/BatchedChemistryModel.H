@@ -109,6 +109,9 @@ protected:
         //- Initial state vector storage [T_0, V_0, n0_0, n1_0, ...]
         scalarField phi0;
 
+        //- Parameter storage [P]
+        scalarField _p;
+
         //- Chemical time-step storage
         scalarField deltaTChem;
 
