@@ -307,6 +307,10 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
             for (label i=0; i<nSpecie_ - 1; i++)
             {
                 scalar ni = max(phi[concIndex(mask, i)], 0.0);
+                // note: both the integrated (mean) moles and fine-scale (original)
+                // moles are divided by the new (mean) volume, as determined by
+                // accelerint -- rather than each by it's own volume
+                //      see paper for details
                 RR_[i][celli] = specieThermo_[i].W() * dtinv * dVinv * (
                     ni - phi0[concIndex(mask, i)]);
                 nNs -= ni;
