@@ -217,8 +217,6 @@ void Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::calculate()
     NotImplemented;
 }
 
-#include "thermodynamicConstants.H"
-
 template<class ReactionThermo, class ThermoType>
 template<class DeltaTType>
 Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
@@ -246,6 +244,8 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
     #define TIndex(count) (nEqns() * (count))
     #define VIndex(count) (nEqns() * (count) + 1)
     #define concIndex(count, i) (nEqns() * (count) + (i) + 2)
+    // universal gas constant in J / (kmol * K) from pyJac
+    #define RU (8314.462)
 
     scalarField nNs0(rho.size());
 
@@ -267,7 +267,7 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
 
             // determine moles of last specie as:
             //      [Cns] = PV / RT - sum([Ci], i=1...Ns-1)
-            nNs0[count] = _p[count] * Vi / (Foam::constant::thermodynamic::RR * Ti);
+            nNs0[count] = _p[count] * Vi / (RU * Ti);
 
             // convert mass fractions to moles
             for (label i=0; i<nSpecie_ - 1; i++)
@@ -302,8 +302,7 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
             const scalar dVinv = 1.0 / phi[VIndex(mask)];
             // determine moles of last specie as:
             //      [Cns] = PV / RT - sum([Ci], i=1...Ns-1)
-            scalar nNs = _p[mask] * phi[VIndex(mask)] / (
-                Foam::constant::thermodynamic::RR * phi[TIndex(mask)]);
+            scalar nNs = _p[mask] * phi[VIndex(mask)] / (RU * phi[TIndex(mask)]);
             for (label i=0; i<nSpecie_ - 1; i++)
             {
                 scalar ni = max(phi[concIndex(mask, i)], 0.0);
@@ -339,6 +338,7 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
     #undef TIndex
     #undef VIndex
     #undef VIndex0
+    #undef RU
 
     return deltaTMin;
 }
