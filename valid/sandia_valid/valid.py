@@ -23,12 +23,16 @@ Description
 start   (0 0 -0.1);
 end     (0 0 0.5);
 fields  ({fields});
-
 setFormat   csv;
 
 
 // Sampling and I/O settings
 #includeEtc "caseDicts/postProcessing/graphs/sampleDict.cfg"
+
+setConfig
+{{
+    nPoints         50;
+}}
 
 // Must be last entry
 #includeEtc "caseDicts/postProcessing/graphs/graph.cfg"
@@ -52,14 +56,14 @@ def times(case):
         yield os.path.join(path, time)
 
 
-def extract(fields):
+def extract(fields, timelist=[]):
     home = os.getcwd()
     for case in valid(home):
         # try to extract
         os.chdir(case)
         try:
             with open(os.path.join('system', 'extractAxial'), 'w') as file:
-                file.write(skeleton.format(fields=fields))
+                file.write(skeleton.format(fields=' '.join(fields)))
 
             subprocess.check_call(['foamDictionary', '-entry', 'functions',
                                    '-set', '{#includeFunc extractAxial}',
@@ -70,14 +74,21 @@ def extract(fields):
                 '-value', 'system/controlDict']).strip()
 
             # chdir
-            subprocess.check_call([app, '-postProcess'])
+            call = [app, '-postProcess']
+            if timelist:
+                call += ['-time', ', '.join([str(x) for x in timelist])]
+            subprocess.check_call(call)
+        except FileNotFoundError:
+            pass
         finally:
             os.chdir(home)
 
 
-def plot(fields, timelist, show):
+def plot(fields, timelist, show, grey=False):
     marker_wheel = ['.', 'o', 'v', 's']
     size_wheel = [6, 10, 14, 16]
+    cmap = 'Greys' if grey else 'inferno'
+    color_wheel = plt.get_cmap(cmap, len(size_wheel) + 1)
     home = os.getcwd()
     results = {}
     timev = set(timelist)
@@ -112,7 +123,8 @@ def plot(fields, timelist, show):
                              linestyle='',
                              marker=marker_wheel[j % len(marker_wheel)],
                              markersize=size_wheel[j % len(size_wheel)],
-                             markerfacecolor='none')
+                             markerfacecolor='none',
+                             color=color_wheel(j % len(size_wheel)))
             plt.title(field + ' comparison at time {}s'.format(time))
             plt.legend(loc=0)
             plt.xlabel('Z-position (m)')
