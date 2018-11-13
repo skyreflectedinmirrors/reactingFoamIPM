@@ -261,7 +261,6 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
             phi[TIndex(count)] = Ti;
             // store 'volume'
             phi[VIndex(count)] = Vi;
-            phi0[VIndex(count)] = Vi;
             // store pressure
             _p[count] = p[celli];
 
