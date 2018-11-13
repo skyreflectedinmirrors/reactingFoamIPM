@@ -333,10 +333,8 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
     }
 
     #undef concIndex
-    #undef concIndex0
     #undef TIndex
     #undef VIndex
-    #undef VIndex0
     #undef RU
 
     return deltaTMin;
