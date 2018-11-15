@@ -10,24 +10,39 @@ FoamFile
     version         2;
     format          ascii;
     class           dictionary;
-    location        "constant";
-    object          chemistryProperties;
+    location        "system";
+    object          controlDict;
 }
 
-chemistryType
-{
-    solver          ode;
-    method          standard;
-}
+application     reactingFoamIPM;
 
-chemistry       on;
-initialChemicalTimeStep 1e-07;
+startFrom       startTime;
 
-odeCoeffs
-{
-    solver          Rosenbrock34;
-    absTol          1e-10;
-    relTol          1-06;
-}
+startTime       1500;
+
+stopAt          endTime;
+
+endTime         5000;
+
+deltaT          1;
+
+writeControl    runTime;
+
+writeInterval   100;
+
+purgeWrite      0;
+
+writeFormat     binary;
+
+writePrecision  10;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
 
 // ************************************************************************* //

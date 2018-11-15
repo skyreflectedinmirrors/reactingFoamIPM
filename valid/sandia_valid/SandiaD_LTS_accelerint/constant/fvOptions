@@ -7,27 +7,18 @@
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
-    version         2;
-    format          ascii;
-    class           dictionary;
-    location        "constant";
-    object          chemistryProperties;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      fvOptions;
 }
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-chemistryType
+radiation
 {
-    solver          ode;
-    method          standard;
-}
-
-chemistry       on;
-initialChemicalTimeStep 1e-07;
-
-odeCoeffs
-{
-    solver          Rosenbrock34;
-    absTol          1e-10;
-    relTol          1-06;
+    type            radiation;
+    libs ("libradiationModels.so");
 }
 
 // ************************************************************************* //

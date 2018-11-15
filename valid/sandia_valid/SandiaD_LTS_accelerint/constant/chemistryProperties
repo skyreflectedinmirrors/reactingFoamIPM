@@ -16,18 +16,22 @@ FoamFile
 
 chemistryType
 {
-    solver          ode;
-    method          standard;
+    solver          batched;
+    method          batchedIPM;
 }
 
 chemistry       on;
+
 initialChemicalTimeStep 1e-07;
 
 odeCoeffs
 {
-    solver          Rosenbrock34;
     absTol          1e-10;
-    relTol          1-06;
+    relTol          1e-06;
+    solver          AccelerInt;
+    accSolver       ROS4;
+    vectorSize      8;
+    platform        intel;
 }
 
 // ************************************************************************* //

@@ -7,27 +7,22 @@
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
-    version         2;
-    format          ascii;
-    class           dictionary;
-    location        "constant";
-    object          chemistryProperties;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      turbulenceProperties;
 }
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-chemistryType
+simulationType   RAS;
+
+RAS
 {
-    solver          ode;
-    method          standard;
-}
+    RASModel        kEpsilon;
 
-chemistry       on;
-initialChemicalTimeStep 1e-07;
-
-odeCoeffs
-{
-    solver          Rosenbrock34;
-    absTol          1e-10;
-    relTol          1-06;
+    turbulence      on;
+    printCoeffs     on;
 }
 
 // ************************************************************************* //
