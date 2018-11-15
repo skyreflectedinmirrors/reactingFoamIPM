@@ -19,6 +19,7 @@ foamDictionary -entry "startTime" -set "0" system/controlDict
 foamDictionary -entry "writeInterval" -set "1500" system/controlDict
 foamDictionary -entry "endTime" -set "1500" system/controlDict
 foamDictionary -entry "chemistry" -set "off" constant/chemistryProperties
+foamDictionary -entry "deltaT" -set "1" system/controlDict
 
 runApplication $application
 
