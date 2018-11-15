@@ -34,7 +34,8 @@ runApplication -o $application
 foamDictionary -entry "startTime" -set "5000" system/controlDict
 foamDictionary -entry "writeInterval" -set "1e-3" system/controlDict
 foamDictionary -entry "endTime" -set "5000.005" system/controlDict
-foamDictionary -entry "ddtSchemes" -set "backward" system/fvSchemes
+foamDictionary -entry "ddtSchemes.default" -set "backward" system/fvSchemes
+foamDictionary -entry "deltaT" -set "1e-6" system/controlDict
 
 runApplication -o $application
 
