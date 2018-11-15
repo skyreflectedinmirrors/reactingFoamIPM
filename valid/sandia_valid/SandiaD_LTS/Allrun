@@ -20,7 +20,7 @@ foamDictionary -entry "writeInterval" -set "1500" system/controlDict
 foamDictionary -entry "endTime" -set "1500" system/controlDict
 foamDictionary -entry "chemistry" -set "off" constant/chemistryProperties
 foamDictionary -entry "deltaT" -set "1" system/controlDict
-oamDictionary -entry "ddtSchemes.default" -set "localEuler" system/fvSchemes
+foamDictionary -entry "ddtSchemes.default" -set "localEuler" system/fvSchemes
 
 runApplication $application
 
