@@ -69,6 +69,7 @@ Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::BatchedChemistryModel
     integrationMask = labelField(size);
     dt = scalarField(size);
     _p = scalarField(size);
+    nNs0 = scalarField(size);
 
     // Create the fields for the chemistry sources
     forAll(RR_, fieldi)
@@ -246,8 +247,6 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
     #define concIndex(count, i) (nEqns() * (count) + (i) + 2)
     // universal gas constant in J / (kmol * K) from pyJac
     #define RU (8314.462)
-
-    scalarField nNs0(rho.size());
 
     forAll(rho, celli)
     {
