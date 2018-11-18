@@ -255,7 +255,7 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
         if (Ti > Treact_)
         {
             const scalar rhoi = rho[celli];
-            const scalar Vi = this->mesh_.V()[celli];
+            const scalar Vi = 1.0;
             // store temperature
             phi[TIndex(count)] = Ti;
             // store 'volume'
