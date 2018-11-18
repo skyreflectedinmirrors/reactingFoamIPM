@@ -29,6 +29,7 @@ foamDictionary -entry "startTime" -set "1500" system/controlDict
 foamDictionary -entry "writeInterval" -set "100" system/controlDict
 foamDictionary -entry "endTime" -set "5000" system/controlDict
 foamDictionary -entry "chemistry" -set "on" constant/chemistryProperties
+foamDictionary -entry "Treact" -remove constant/chemistryProperties
 
 runApplication -o $application
 
@@ -38,7 +39,7 @@ foamDictionary -entry "writeInterval" -set "1e-3" system/controlDict
 foamDictionary -entry "endTime" -set "5000.005" system/controlDict
 foamDictionary -entry "ddtSchemes.default" -set "backward" system/fvSchemes
 foamDictionary -entry "deltaT" -set "1e-6" system/controlDict
-
+foamDictionary -entry "Treact" -set "500" constant/chemistryProperties
 
 runApplication -o $application
 
