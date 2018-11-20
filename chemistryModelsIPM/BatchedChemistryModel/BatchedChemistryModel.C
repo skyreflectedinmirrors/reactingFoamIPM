@@ -279,6 +279,9 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
             // Initialise time progress
             dt[count] = deltaT[celli];
 
+            // set initial chemical timestep
+            deltaTChem[count] = this->deltaTChem_[celli];
+
             // and store mask
             integrationMask[celli] = count++;
         }
