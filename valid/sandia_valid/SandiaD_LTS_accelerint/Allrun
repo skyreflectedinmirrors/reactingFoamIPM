@@ -17,7 +17,7 @@ runApplication chemkinToFoam \
 
 runApplication blockMesh
 runApplication setFields
-runApplication decomposePar
+runApplication decomposePar -latestTime
 
 # Run the application without chemistry until 1500 to let the flow field develop
 foamDictionary -entry "startTime" -set "0" system/controlDict
