@@ -30,3 +30,28 @@
 *.exe
 *.out
 *.app
+
+# OpenFOAM build directories
+linux64GccDPInt32Debug/
+linux64GccDPInt32Opt/
+lnInclude/
+
+# OpenFOAM time & processor directories
+[0-9]*/
+processor[0-9]*/
+dynamicCode/
+
+# mesh dirs & extra FOAM files
+polyMesh/
+decomposeParDict
+extractAxial
+temp.cl
+
+# log files
+*.ipm.xml
+log.*
+run.log
+
+# pyjac / accelerint files
+lib/
+include/
