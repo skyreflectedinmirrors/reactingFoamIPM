@@ -185,7 +185,7 @@ Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::calculateRR
     const label si
 ) const
 {
-    NotImplemented
+    NotImplemented;
     tmp<volScalarField::Internal> tRR
     (
         new volScalarField::Internal
