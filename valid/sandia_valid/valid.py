@@ -98,14 +98,14 @@ def plot(fields, timelist, show, grey=False):
         try:
             # load all data
             for time in times(case):
-                t = int(os.path.basename(time))
-                if timelist and t not in timev:
+                t = float(os.path.basename(time))
+                if timelist and not any(np.isclose(x, t) for x in timelist):
                     continue
                 vals = np.fromfile(os.path.join(time, 'line_{}.xy'.format(
                     '_'.join(fields))), sep='\n')
                 vals = vals.reshape((-1, len(fields) + 1))
                 results[nicecase][t] = vals
-                timev.add(int(t))
+                timev.add(float(t))
         except FileNotFoundError:
             pass
         if not results[nicecase]:
