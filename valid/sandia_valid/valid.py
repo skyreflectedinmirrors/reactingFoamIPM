@@ -165,7 +165,7 @@ if __name__ == '__main__':
 
     parser.add_argument('-t', '--times',
                         nargs='+',
-                        default=[5000],
+                        default=[5000, 5000.01],
                         type=int,
                         help='The times to plot / extract.')
     args = parser.parse_args()
