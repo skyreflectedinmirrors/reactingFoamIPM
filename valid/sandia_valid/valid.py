@@ -41,11 +41,13 @@ setConfig
 """).strip()
 
 
-def valid(home=os.getcwd()):
-    for case in os.listdir(home):
-        if not os.path.isdir(os.path.join(os.getcwd(), case)):
-            continue
-        yield case
+def valid(home=os.getcwd(), caselist=[]):
+    if not caselist:
+        caselist = os.listdir(home)
+    for case in caselist:
+            if not os.path.isdir(os.path.join(os.getcwd(), case)):
+                continue
+            yield case
 
 
 def times(case):
@@ -56,18 +58,29 @@ def times(case):
         yield os.path.join(path, time)
 
 
-def extract(fields, timelist=[]):
+def extract(fields, timelist=[], caselist=[]):
     home = os.getcwd()
-    for case in valid(home):
+
+    def _make_times():
+        return "{}".format(','.join([str(x) for x in timelist]))
+    for case in valid(home, caselist=caselist):
         # try to extract
         os.chdir(case)
         try:
             with open(os.path.join('system', 'extractAxial'), 'w') as file:
                 file.write(skeleton.format(fields=' '.join(fields)))
 
+            # set the extractor
             subprocess.check_call(['foamDictionary', '-entry', 'functions',
                                    '-set', '{#includeFunc extractAxial}',
                                    'system/controlDict'])
+
+            # reconstruct our desired times
+            call = ['reconstructPar', '-fields', '({})'.format(' '.join(fields)),
+                    '-newTimes']
+            if timelist:
+                call += ['-time', _make_times()]
+            subprocess.check_call(call)
 
             app = subprocess.check_output([
                 'foamDictionary', '-entry', 'application',
@@ -76,7 +89,7 @@ def extract(fields, timelist=[]):
             # chdir
             call = [app, '-postProcess']
             if timelist:
-                call += ['-time', ', '.join([str(x) for x in timelist])]
+                call += ['-time', _make_times()]
             subprocess.check_call(call)
         except FileNotFoundError:
             pass
@@ -85,6 +98,9 @@ def extract(fields, timelist=[]):
 
 
 def plot(fields, timelist, show, grey=False):
+
+    def _timecheck(t1, t2):
+        return np.isclose(t1, t2, atol=1e-10, rtol=1e-10)
     marker_wheel = ['.', 'o', 'v', 's']
     size_wheel = [6, 10, 14, 16]
     cmap = 'Greys' if grey else 'inferno'
@@ -99,13 +115,14 @@ def plot(fields, timelist, show, grey=False):
             # load all data
             for time in times(case):
                 t = float(os.path.basename(time))
-                if timelist and not any(np.isclose(x, t) for x in timelist):
+                if timelist and not any(_timecheck(x, t) for x in timelist):
                     continue
                 vals = np.fromfile(os.path.join(time, 'line_{}.xy'.format(
                     '_'.join(fields))), sep='\n')
                 vals = vals.reshape((-1, len(fields) + 1))
-                results[nicecase][t] = vals
-                timev.add(float(t))
+                nice_t = next(x for x in timelist if _timecheck(x, t))
+                results[nicecase][nice_t] = vals
+                timev.add(float(nice_t))
         except FileNotFoundError:
             pass
         if not results[nicecase]:
@@ -118,7 +135,11 @@ def plot(fields, timelist, show, grey=False):
     for i, field in enumerate(fields):
         for time in sorted(timev):
             for j, case in enumerate(results):
+                if time not in results[case]:
+                    continue
                 vals = results[case][time]
+                if not vals.size:
+                    continue
                 plt.semilogy(vals[:, 0], vals[:, 1 + i], label=case,
                              linestyle='',
                              marker=marker_wheel[j % len(marker_wheel)],
@@ -168,9 +189,16 @@ if __name__ == '__main__':
                         default=[5000, 5000.01],
                         type=int,
                         help='The times to plot / extract.')
+
+    parser.add_argument('-c', '--cases',
+                        nargs='+',
+                        default=None,
+                        type=str,
+                        help='The cases to process.')
+
     args = parser.parse_args()
 
     if args.extract:
-        extract(args.fields, args.times)
+        extract(args.fields, args.times, args.cases)
     if args.plot:
         plot(args.fields, args.times, args.show)
