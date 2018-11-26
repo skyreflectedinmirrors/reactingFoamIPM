@@ -2,10 +2,19 @@ import os
 import subprocess
 import argparse
 import numpy as np
+import matplotlib as mpl
+from string import Template
+# setup latex
+mpl.rc('text', usetex=True)
+mpl.rc('font', family='serif')
+mpl.rc('text.latex',
+       preamble=r'\usepackage{amsmath},\usepackage{siunitx},'
+                r'\usepackage[version=4]{mhchem}')
+mpl.rc('font', family='serif')
 import matplotlib.pyplot as plt
 
 
-skeleton = (r"""
+skeleton = Template(r"""
 /*--------------------------------*- C++ -*----------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
@@ -22,7 +31,7 @@ Description
 // axial velocity varying along y-direction, useful for monitoring solution
 start   (0 0 -0.1);
 end     (0 0 0.5);
-fields  ({fields});
+fields  ${fields};
 setFormat   csv;
 
 
@@ -30,15 +39,15 @@ setFormat   csv;
 #includeEtc "caseDicts/postProcessing/graphs/sampleDict.cfg"
 
 setConfig
-{{
+{
     nPoints         50;
-}}
+}
 
 // Must be last entry
 #includeEtc "caseDicts/postProcessing/graphs/graph.cfg"
 
 // ************************************************************************* //
-""").strip()
+""".strip())
 
 
 def valid(home=os.getcwd(), caselist=[]):
@@ -58,17 +67,45 @@ def times(case):
         yield os.path.join(path, time)
 
 
-def extract(fields, timelist=[], caselist=[]):
+# required fields to use the app for post-processing:
+req_fields = set(['U', 'alphat', 'nut', 'k', 'epsilon', 'G'])
+
+
+def _make_full_fields(fields, for_extract=True):
+    subtract = set()
+    if not for_extract:
+        subtract = set(['U'])
+    return sorted((req_fields | set(fields)) - subtract)
+
+
+def _make_fields(fields, for_extract=True):
+    f = _make_full_fields(fields, for_extract=for_extract)
+    if for_extract:
+        return '({})'.format(' '.join(f))
+    else:
+        return '_'.join(f)
+
+
+def _field_index(field, fields, for_extract=True):
+    return _make_full_fields(fields, for_extract=for_extract).index(field)
+
+
+def _num_fields(fields, for_extract=True):
+    return len(_make_full_fields(fields, for_extract=for_extract))
+
+
+def extract(fields, timelist=[], caselist=[], force=False):
     home = os.getcwd()
 
     def _make_times():
         return "{}".format(','.join([str(x) for x in timelist]))
+
     for case in valid(home, caselist=caselist):
         # try to extract
         os.chdir(case)
         try:
             with open(os.path.join('system', 'extractAxial'), 'w') as file:
-                file.write(skeleton.format(fields=' '.join(fields)))
+                file.write(skeleton.substitute(fields=_make_fields(fields)))
 
             # set the extractor
             subprocess.check_call(['foamDictionary', '-entry', 'functions',
@@ -76,8 +113,9 @@ def extract(fields, timelist=[], caselist=[]):
                                    'system/controlDict'])
 
             # reconstruct our desired times
-            call = ['reconstructPar', '-fields', '({})'.format(' '.join(fields)),
-                    '-newTimes']
+            call = ['reconstructPar']
+            if not force:
+                call += ['-newTimes']
             if timelist:
                 call += ['-time', _make_times()]
             subprocess.check_call(call)
@@ -95,6 +133,38 @@ def extract(fields, timelist=[], caselist=[]):
             pass
         finally:
             os.chdir(home)
+
+
+name_map = {'SandiaD_LTS': 'OF (ROS4)',
+            'SandiaD_LTS_seulex': 'OF (seulex)',
+            'SandiaD_LTS_accelerint': 'AI (ROS4)',
+            'SandiaD_acc_truevol': 'AI (ROS4, new)'}
+
+
+def fieldnames(field):
+    defaults = {'p': 'Pressure (Pa)',
+                'T': 'Temperature (K)'}
+    if field in defaults:
+        return defaults[field]
+
+    return Template(r'$$\text{Y}_{\ce{${field}}}$$').substitute(field=field)
+
+
+def limits(field):
+    defaults = {}
+    if field in defaults:
+        return defaults[field]
+
+    return (None, None)
+
+
+def islog(field):
+    defaults = {'T': False,
+                'p': False,
+                'N2': False}
+    if field in defaults:
+        return defaults[field]
+    return True
 
 
 def plot(fields, timelist, show, grey=False):
@@ -118,8 +188,8 @@ def plot(fields, timelist, show, grey=False):
                 if timelist and not any(_timecheck(x, t) for x in timelist):
                     continue
                 vals = np.fromfile(os.path.join(time, 'line_{}.xy'.format(
-                    '_'.join(fields))), sep='\n')
-                vals = vals.reshape((-1, len(fields) + 1))
+                    _make_fields(fields, for_extract=False))), sep='\n')
+                vals = vals.reshape((-1, _num_fields(fields, for_extract=False) + 1))
                 nice_t = next(x for x in timelist if _timecheck(x, t))
                 results[nicecase][nice_t] = vals
                 timev.add(float(nice_t))
@@ -132,24 +202,44 @@ def plot(fields, timelist, show, grey=False):
         os.mkdir('figs')
     except OSError:
         pass
-    for i, field in enumerate(fields):
+    for field in fields:
         for time in sorted(timev):
+            ymin = np.finfo(np.float64).max
+            ymax = -np.finfo(np.float64).max
             for j, case in enumerate(results):
                 if time not in results[case]:
                     continue
                 vals = results[case][time]
                 if not vals.size:
                     continue
-                plt.semilogy(vals[:, 0], vals[:, 1 + i], label=case,
-                             linestyle='',
-                             marker=marker_wheel[j % len(marker_wheel)],
-                             markersize=size_wheel[j % len(size_wheel)],
-                             markerfacecolor='none',
-                             color=color_wheel(j % len(size_wheel)))
-            plt.title(field + ' comparison at time {}s'.format(time))
-            plt.legend(loc=0)
-            plt.xlabel('Z-position (m)')
-            plt.ylabel(field)
+                index = _field_index(field, fields, for_extract=False)
+                if case in name_map:
+                    case = name_map[case]
+
+                ymin = np.minimum(ymin, np.min(vals[:, 1 + index]))
+                ymax = np.maximum(ymax, np.max(vals[:, 1 + index]))
+                plotter = plt.semilogy if islog(field) else plt.plot
+                plotter(vals[:, 0], vals[:, 1 + index], label=case,
+                        linestyle='',
+                        marker=marker_wheel[j % len(marker_wheel)],
+                        markersize=size_wheel[j % len(size_wheel)],
+                        markerfacecolor='none',
+                        color=color_wheel(j % len(size_wheel)))
+
+            plt.ylim(*limits(field))
+            plt.legend(**{'loc': 0,
+                          'fontsize': 16,
+                          'numpoints': 1,
+                          'shadow': True,
+                          'fancybox': True})
+            plt.tick_params(axis='both', which='major', labelsize=20)
+            plt.tick_params(axis='both', which='minor', labelsize=16)
+            for item in (plt.gca().title, plt.gca().xaxis.label,
+                         plt.gca().yaxis.label):
+                item.set_fontsize(24)
+            plt.xlabel('Axial-position (m)')
+            plt.ylabel(fieldnames(field))
+            plt.tight_layout()
             plt.savefig(os.path.join('figs', '{field}_{time}.pdf'.format(
                 time=time, field=field)))
             if show:
@@ -196,9 +286,15 @@ if __name__ == '__main__':
                         type=str,
                         help='The cases to process.')
 
+    parser.add_argument('-r', '--force_reextraction',
+                        action='store_true',
+                        default=False,
+                        help='If specified, re-extract the post-processing data '
+                             'regardless of whether it already exists or not.')
+
     args = parser.parse_args()
 
     if args.extract:
-        extract(args.fields, args.times, args.cases)
+        extract(args.fields, args.times, args.cases, args.force_reextraction)
     if args.plot:
         plot(args.fields, args.times, args.show)
