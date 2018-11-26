@@ -41,7 +41,7 @@ runApplication -o $application
 # finally, run in a non-LTS mode for 5 ms to get a time-dependent validation
 foamDictionary -entry "startTime" -set "5000" system/controlDict
 foamDictionary -entry "writeInterval" -set "1e-3" system/controlDict
-foamDictionary -entry "endTime" -set "5000.005" system/controlDict
+foamDictionary -entry "endTime" -set "5000.01" system/controlDict
 foamDictionary -entry "ddtSchemes.default" -set "backward" system/fvSchemes
 foamDictionary -entry "deltaT" -set "1e-6" system/controlDict
 foamDictionary -entry "Treact" -set "500" constant/chemistryProperties
