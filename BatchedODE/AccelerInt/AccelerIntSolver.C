@@ -116,7 +116,7 @@ Foam::AccelerIntSolver::AccelerIntSolver(const BatchedODESystem& ode, const dict
     }
     // pyJac reports the total number of species, in order to match we should have:
     // neq == nsp - 1 + 2 for (T, V) == nsp + 1
-    if (jk.numSpecies() + 1 != (size_t)n_)
+    if (jk.numSpecies() + 1 != static_cast<size_t>(n_))
     {
         FatalErrorInFunction
             << "Number of equations reported by pyJac (" << jk.numSpecies() + 1
