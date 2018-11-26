@@ -14,7 +14,7 @@ FoamFile
     object          controlDict;
 }
 
-application     reactingFoam;
+application     reactingFoamIPM;
 
 startFrom       startTime;
 

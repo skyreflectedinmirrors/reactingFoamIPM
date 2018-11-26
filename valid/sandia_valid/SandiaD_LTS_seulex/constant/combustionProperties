@@ -15,9 +15,9 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-combustionModel  EDC;
+combustionModel  edcIPM;
 
-EDCCoeffs
+edcIPMCoeffs
 {
     version v2005;
 }
