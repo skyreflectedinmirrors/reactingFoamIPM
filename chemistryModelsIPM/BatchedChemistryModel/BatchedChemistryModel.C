@@ -303,7 +303,7 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
             const scalar dVinv = 1.0 / phi[VIndex(mask)];
             if (dVinv < 0 || phi[TIndex(mask)] < 0)
             {
-                FatalErrorInFunction << "Bad state, volume = " << phi[VIndex(mask)] 
+                FatalErrorInFunction << "Bad state, volume = " << phi[VIndex(mask)]
                                      << ", temperature = " << phi[TIndex(mask)];
             }
             // determine moles of last specie as:
