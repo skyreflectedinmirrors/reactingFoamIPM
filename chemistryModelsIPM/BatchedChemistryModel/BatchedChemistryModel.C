@@ -299,7 +299,7 @@ Foam::scalar Foam::BatchedChemistryModel<ReactionThermo, ThermoType>::solve
         if (integrationMask[celli] >= 0)
         {
             const label mask = integrationMask[celli];
-            const scalar dtinv = 1.0 / deltaT[mask];
+            const scalar dtinv = 1.0 / dt[mask];
             const scalar dVinv = 1.0 / phi[VIndex(mask)];
             if (dVinv < 0 || phi[TIndex(mask)] < 0)
             {
