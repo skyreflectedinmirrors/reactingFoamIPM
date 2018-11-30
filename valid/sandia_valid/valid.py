@@ -244,6 +244,26 @@ def plot(fields, timelist, show, grey=False):
             if show:
                 plt.show()
             plt.close()
+    return timev, results
+
+
+def validate(times, results, fields, base='SandiaD_LTS'):
+    for time in times:
+        comp = results[base][time]
+        for case in results:
+            if case == base:
+                continue
+            if time not in results[case]:
+                continue
+            test = results[case][time]
+            diff = np.abs(comp - test) / (1e-30 + np.abs(comp))
+            diff = np.linalg.norm(diff, ord=2, axis=1)
+            rel_err = np.linalg.norm(diff, ord=np.inf, axis=0) * 100.
+
+            diff = np.abs(comp - test) / (1e-10 + 1e-06 * np.abs(comp))
+            diff = np.linalg.norm(diff, ord=2, axis=1)
+            weighted_err = np.linalg.norm(diff, ord=np.inf, axis=0)
+            print(case, time, "rel:", rel_err, "%", "weighted:", weighted_err)
 
 
 if __name__ == '__main__':
@@ -291,9 +311,20 @@ if __name__ == '__main__':
                         help='If specified, re-extract the post-processing data '
                              'regardless of whether it already exists or not.')
 
+    parser.add_argument('-v', '--validate',
+                        action='store_true',
+                        default=False,
+                        help='If specified, emit a norm-based evaluation of the '
+                             'differences between the various solutions.')
+
     args = parser.parse_args()
 
     if args.extract:
         extract(args.fields, args.times, args.cases, args.force_reextraction)
+    t = None
+    results = None
     if args.plot:
-        plot(args.fields, args.times, args.show)
+        t, results = plot(args.fields, args.times, args.show)
+    if args.validate:
+        assert args.plot, "must plot to validate"
+        validate(t, results, args.fields)
