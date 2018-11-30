@@ -29,8 +29,8 @@ Description
 \*---------------------------------------------------------------------------*/
 
 // axial velocity varying along y-direction, useful for monitoring solution
-start   (0 0 -0.1);
-end     (0 0 0.5);
+start   (0.0091 0 0.0);
+end     (0.0091 0 0.5);
 fields  ${fields};
 setFormat   csv;
 
