@@ -253,7 +253,7 @@ if __name__ == '__main__':
     parser.add_argument('-f', '--fields',
                         nargs='+',
                         default=['T', 'p', 'CH4', 'CO', 'CO2', 'N2', 'O',
-                                 'H', 'OH', 'HO2', 'H2O'],
+                                 'H', 'OH', 'HO2', 'H2O', 'NO'],
                         type=str,
                         required=False,
                         help='The fields to extract / plot')
