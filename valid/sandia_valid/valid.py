@@ -137,8 +137,7 @@ def extract(fields, timelist=[], caselist=[], force=False):
 
 name_map = {'SandiaD_LTS': 'OF (ROS4)',
             'SandiaD_LTS_seulex': 'OF (seulex)',
-            'SandiaD_LTS_accelerint': 'AI (ROS4)',
-            'SandiaD_acc_truevol': 'AI (ROS4, new)'}
+            'SandiaD_LTS_accelerint': 'AI (ROS4)'}
 
 
 def fieldnames(field):
