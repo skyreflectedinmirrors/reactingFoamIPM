@@ -22,7 +22,7 @@ fi
 
 gnuplot<<EOF
     set terminal postscript eps color enhanced "Helveicta,20"
-    set output "OF_vs_ACC_vs_CHEMKINII.eps"
+    set output "OF_vs_ACC_vs_CANTERA.eps"
     set xlabel "Time / [s]" font "Helveicta,24"
     set ylabel "Temperature / [K]" font "Helveicta,24"
     set grid
@@ -33,7 +33,7 @@ gnuplot<<EOF
     plot \
         "../chemFoam.out" u 1:2 t "accelerInt" with points lt 1 pt 6 ps 1.5 lc rgb "red",\
         "../chemFoam_base.out" u 1:2 t "OpenFOAM" with points lt 1 pt 4 ps 0.5 lc rgb "blue",\
-        "chemkinII" with lines title "Chemkin II" lt -1
+        "ct.log" with lines title "Cantera" lt -1
 EOF
 
 #------------------------------------------------------------------------------
