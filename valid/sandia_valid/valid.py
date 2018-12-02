@@ -247,7 +247,12 @@ def plot(fields, timelist, show, grey=False):
     return timev, results
 
 
-def validate(times, results, fields, base='SandiaD_LTS'):
+def validate(times, results, fields, base='SandiaD_LTS_seulex'):
+    indicies = []
+    for field in fields:
+        index = _field_index(field, fields, for_extract=False)
+        indicies.append(index)
+    indicies = np.array(indicies, dtype=np.int32)
     for time in times:
         comp = results[base][time]
         for case in results:
@@ -256,11 +261,13 @@ def validate(times, results, fields, base='SandiaD_LTS'):
             if time not in results[case]:
                 continue
             test = results[case][time]
-            diff = np.abs(comp - test) / (1e-30 + np.abs(comp))
+            diff = np.abs(comp[:, 1 + indicies] - test[:, 1 + indicies]) / (
+                1e-30 + np.abs(comp[:, 1 + indicies]))
             diff = np.linalg.norm(diff, ord=2, axis=1)
             rel_err = np.linalg.norm(diff, ord=np.inf, axis=0) * 100.
 
-            diff = np.abs(comp - test) / (1e-10 + 1e-06 * np.abs(comp))
+            diff = np.abs(comp[:, 1 + indicies] - test[:, 1 + indicies]) / (
+                1e-10 + 1e-06 * np.abs(comp[:, 1 + indicies]))
             diff = np.linalg.norm(diff, ord=2, axis=1)
             weighted_err = np.linalg.norm(diff, ord=np.inf, axis=0)
             print(case, time, "rel:", rel_err, "%", "weighted:", weighted_err)
@@ -272,7 +279,8 @@ if __name__ == '__main__':
     parser.add_argument('-f', '--fields',
                         nargs='+',
                         default=['T', 'p', 'CH4', 'CO', 'CO2', 'N2', 'O',
-                                 'H', 'OH', 'HO2', 'H2O', 'NO'],
+                                 'H', 'OH', 'HO2', 'H2O', 'NO', 'CH2O', 'HCO',
+                                 'N2O'],
                         type=str,
                         required=False,
                         help='The fields to extract / plot')
