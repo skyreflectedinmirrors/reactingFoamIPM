@@ -135,9 +135,9 @@ def extract(fields, timelist=[], caselist=[], force=False):
             os.chdir(home)
 
 
-name_map = {'SandiaD_LTS': 'OF (ROS4)',
-            'SandiaD_LTS_seulex': 'OF (seulex)',
-            'SandiaD_LTS_accelerint': 'AI (ROS4)'}
+name_map = {'SandiaD_LTS': r'OF (\texttt{ROS4})',
+            'SandiaD_LTS_seulex': r'OF (\texttt{Seulex})',
+            'SandiaD_LTS_accelerint': r'AI (\texttt{ROS4})'}
 
 
 def fieldnames(field):
@@ -247,7 +247,7 @@ def plot(fields, timelist, show, grey=False):
     return timev, results
 
 
-def validate(times, results, fields, base='SandiaD_LTS_seulex'):
+def validate(times, results, fields, base='SandiaD_LTS'):
     indicies = []
     for field in fields:
         index = _field_index(field, fields, for_extract=False)
@@ -262,15 +262,13 @@ def validate(times, results, fields, base='SandiaD_LTS_seulex'):
                 continue
             test = results[case][time]
             diff = np.abs(comp[:, 1 + indicies] - test[:, 1 + indicies]) / (
-                1e-30 + np.abs(comp[:, 1 + indicies]))
-            diff = np.linalg.norm(diff, ord=2, axis=1)
-            rel_err = np.linalg.norm(diff, ord=np.inf, axis=0) * 100.
-
-            diff = np.abs(comp[:, 1 + indicies] - test[:, 1 + indicies]) / (
-                1e-10 + 1e-06 * np.abs(comp[:, 1 + indicies]))
-            diff = np.linalg.norm(diff, ord=2, axis=1)
-            weighted_err = np.linalg.norm(diff, ord=np.inf, axis=0)
-            print(case, time, "rel:", rel_err, "%", "weighted:", weighted_err)
+                1e-300 + np.abs(comp[:, 1 + indicies]))
+            rel_err_inf = np.linalg.norm(
+                np.linalg.norm(diff, ord=np.inf, axis=1), ord=np.inf, axis=0) * 100
+            rel_err_mean = np.linalg.norm(
+                np.linalg.norm(diff, ord=2, axis=1) / diff.shape[1],
+                ord=2, axis=0) * 100. / diff.shape[0]
+            print(case, time, "rel(max, mean)", rel_err_inf, rel_err_mean, "%")
 
 
 if __name__ == '__main__':
