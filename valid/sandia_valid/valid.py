@@ -264,11 +264,22 @@ def validate(times, results, fields, base='SandiaD_LTS'):
             diff = np.abs(comp[:, 1 + indicies] - test[:, 1 + indicies]) / (
                 1e-300 + np.abs(comp[:, 1 + indicies]))
             rel_err_inf = np.linalg.norm(
-                np.linalg.norm(diff, ord=np.inf, axis=1), ord=np.inf, axis=0) * 100
+                np.linalg.norm(diff, ord=np.inf, axis=1), ord=np.inf, axis=0)
+            loc = np.where(rel_err_inf == diff)
+            rel_err_inf *= 100
             rel_err_mean = np.linalg.norm(
                 np.linalg.norm(diff, ord=2, axis=1) / diff.shape[1],
                 ord=2, axis=0) * 100. / diff.shape[0]
-            print(case, time, "rel(max, mean)", rel_err_inf, rel_err_mean, "%")
+            if 'T' in fields:
+                ind = fields.index('T')
+                T_err = np.linalg.norm(diff[:, ind], ord=np.inf, axis=0) * 100.
+                print('Maximum temperature error:', T_err)
+            if 'p' in fields:
+                ind = fields.index('p')
+                p_err = np.linalg.norm(diff[:, ind], ord=np.inf, axis=0) * 100.
+                print('Maximum pressure error:', p_err)
+            print(case, time, "rel(max, mean)", rel_err_inf, rel_err_mean, "%",
+                  'Max error for: ', fields[loc[1][0]])
 
 
 if __name__ == '__main__':
