@@ -28,10 +28,8 @@ LIB_LIBS = \
     -lcantera \
     -Wl,-rpath,$(CT_PATH) \
     -L$(SUN_PATH) \
-    -lsundials_sunlinsollapackband \
-    -lsundials_sunmatrixdense \
-    -lsundials_sunmatrixband \
     -lopenblas \
     -Wl,-rpath,$(SUN_PATH) \
+    $(SUN_LIBS) \
     -L$(IPM_LIBPATH) \
     -lipm
