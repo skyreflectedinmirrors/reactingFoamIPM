@@ -7,4 +7,5 @@ ACCELERINT_PATH=`pwd`/include/ \
 ACCELERINT_LIB_PATH=`pwd`/lib/ \
 CT_PATH=$CONDA_PREFIX/lib/ \
 CT_INC_PATH=$CONDA_PREFIX/include/ \
+SUN_PATH=$CONDA_PREFIX/lib/ \
 ./Allwmake -j12

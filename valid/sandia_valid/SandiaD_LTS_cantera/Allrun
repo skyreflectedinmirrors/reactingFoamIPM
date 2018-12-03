@@ -19,7 +19,7 @@ runApplication chemkinToFoam \
 runApplication ck2cti \
                --input=chemkin/grimech30.dat \
                --thermo=chemkin/thermo30.dat \
-               --output=chemin/grimech30.cti \
+               --output=chemkin/grimech30.cti \
                --permissive
 
 runApplication blockMesh
