@@ -6,6 +6,8 @@ cd ${0%/*} || exit 1    # Run from this directory
 
 # set number of processors
 export IPM_NESTED_REGIONS=1
+# one OpenMP thread
+export OMP_NUM_THREAS=1
 num_proc="10"
 foamDictionary -entry "numberOfSubdomains" -set "$num_proc" system/decomposeParDict
 
