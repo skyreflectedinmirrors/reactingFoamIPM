@@ -1,1 +1,10 @@
-CF_PATH=`pwd`/chemFoamIPM/ WRAPPER_PATH=`pwd`/BatchedODE/AccelerInt/ CL_INC_DIR=/opt/opencl-headers/ PYJAC_PATH=`pwd`/include/ PYJAC_LIB_PATH=`pwd`/lib/ ACCELERINT_PATH=`pwd`/include ACCELERINT_LIB_PATH=`pwd`/lib/ ./Allwmake -j12
+CF_PATH=`pwd`/chemFoamIPM/ \
+WRAPPER_PATH=`pwd`/BatchedODE/AccelerInt/ \
+CL_INC_DIR=/opt/opencl-headers/ \
+PYJAC_PATH=`pwd`/include/ \
+PYJAC_LIB_PATH=`pwd`/lib/ \
+ACCELERINT_PATH=`pwd`/include/ \
+ACCELERINT_LIB_PATH=`pwd`/lib/ \
+CT_PATH=$CONDA_PREFIX/lib/ \
+CT_INC_PATH=$CONDA_PREFIX/include/ \
+./Allwmake -j12

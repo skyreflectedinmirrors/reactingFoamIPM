@@ -10,6 +10,8 @@ EXE_INC = \
     -I$(CL_INC_DIR) \
     -DPYJAC_PATH=$(PYJAC_PATH) \
     -DWRAPPER_PATH=$(WRAPPER_PATH) \
+    -I$(CT_INC_PATH) \
+    -I$(LIB_SRC)/ODE/lnInclude \
     $(PFLAGS) \
     $(PINC)
 
@@ -22,5 +24,8 @@ LIB_LIBS = \
     -L$(PYJAC_LIB_PATH) \
     -Wl,-rpath,$(PYJAC_LIB_PATH) \
     -locl_pyjac \
+    -L$(CT_PATH) \
+    -lcantera \
+    -Wl,-rpath,$(CT_PATH) \
     -L$(IPM_LIBPATH) \
     -lipm

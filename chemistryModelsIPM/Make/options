@@ -13,6 +13,7 @@ EXE_INC = \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I../BatchedODE/lnInclude/ \
+    -I$(CT_INC_PATH) \
     $(PFLAGS) \
     $(PINC)
 
@@ -26,5 +27,8 @@ LIB_LIBS = \
     -lfiniteVolume \
     -lmeshTools \
     -lchemistryModel \
+    -L$(CT_PATH) \
+    -lcantera \
+    -Wl,-rpath,$(CT_PATH) \
     -L$(IPM_LIBPATH) \
     -lipm

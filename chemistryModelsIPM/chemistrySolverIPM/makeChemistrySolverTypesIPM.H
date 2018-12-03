@@ -35,6 +35,7 @@ License
 #include "EulerImplicit.H"
 #include "ode.H"
 #include "batched.H"
+#include "cantera.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -95,6 +96,13 @@ License
     makeChemistrySolverTypeIPM                                                 \
     (                                                                          \
         ode,                                                                   \
+        Comp,                                                                  \
+        Thermo                                                                 \
+    );                                                                         \
+                                                                               \
+    makeChemistrySolverTypeIPM                                                 \
+    (                                                                          \
+        cantera,                                                               \
         Comp,                                                                  \
         Thermo                                                                 \
     );                                                                         \
