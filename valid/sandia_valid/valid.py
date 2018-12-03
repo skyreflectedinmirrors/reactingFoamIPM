@@ -1,6 +1,7 @@
 import os
 import subprocess
 import argparse
+import cantera as ct
 import numpy as np
 import matplotlib as mpl
 from string import Template
@@ -86,6 +87,18 @@ def _make_fields(fields, for_extract=True):
         return '_'.join(f)
 
 
+def _field_iter(fields, for_extract=True):
+    """
+    An iterable to parse the fields into file names that aren't too long
+    for extraction
+    """
+    field_list = fields[:]
+    while field_list:
+        fl_len = min(10, len(field_list))
+        yield field_list[:fl_len]
+        field_list = field_list[fl_len:]
+
+
 def _field_index(field, fields, for_extract=True):
     return _make_full_fields(fields, for_extract=for_extract).index(field)
 
@@ -104,14 +117,6 @@ def extract(fields, timelist=[], caselist=[], force=False):
         # try to extract
         os.chdir(case)
         try:
-            with open(os.path.join('system', 'extractAxial'), 'w') as file:
-                file.write(skeleton.substitute(fields=_make_fields(fields)))
-
-            # set the extractor
-            subprocess.check_call(['foamDictionary', '-entry', 'functions',
-                                   '-set', '{#includeFunc extractAxial}',
-                                   'system/controlDict'])
-
             # reconstruct our desired times
             call = ['reconstructPar']
             if not force:
@@ -120,16 +125,27 @@ def extract(fields, timelist=[], caselist=[], force=False):
                 call += ['-time', _make_times()]
             subprocess.check_call(call)
 
-            app = subprocess.check_output([
-                'foamDictionary', '-entry', 'application',
-                '-value', 'system/controlDict']).strip()
+            for f in _field_iter(fields):
+                with open(os.path.join('system', 'extractAxial'), 'w') as file:
+                    file.write(skeleton.substitute(fields=_make_fields(f)))
 
-            # chdir
-            call = [app, '-postProcess']
-            if timelist:
-                call += ['-time', _make_times()]
-            subprocess.check_call(call)
+                # set the extractor
+                subprocess.check_call(['foamDictionary', '-entry', 'functions',
+                                       '-set', '{#includeFunc extractAxial}',
+                                       'system/controlDict'])
+
+                app = subprocess.check_output([
+                    'foamDictionary', '-entry', 'application',
+                    '-value', 'system/controlDict']).strip()
+
+                # chdir
+                call = [app, '-postProcess']
+                if timelist:
+                    call += ['-time', _make_times()]
+                subprocess.check_call(call)
         except FileNotFoundError:
+            pass
+        except subprocess.CalledProcessError:
             pass
         finally:
             os.chdir(home)
@@ -166,16 +182,13 @@ def islog(field):
     return True
 
 
-def plot(fields, timelist, show, grey=False):
+def _timecheck(t1, t2):
+    return np.isclose(t1, t2, atol=1e-10, rtol=1e-10)
 
-    def _timecheck(t1, t2):
-        return np.isclose(t1, t2, atol=1e-10, rtol=1e-10)
-    marker_wheel = ['.', 'o', 'v', 's']
-    size_wheel = [6, 10, 14, 16]
-    cmap = 'Greys' if grey else 'inferno'
-    color_wheel = plt.get_cmap(cmap, len(size_wheel) + 1)
-    home = os.getcwd()
+
+def load(fields, timelist):
     results = {}
+    home = os.getcwd()
     timev = set(timelist)
     for case in valid(home):
         nicecase = os.path.basename(case)
@@ -186,37 +199,51 @@ def plot(fields, timelist, show, grey=False):
                 t = float(os.path.basename(time))
                 if timelist and not any(_timecheck(x, t) for x in timelist):
                     continue
-                vals = np.fromfile(os.path.join(time, 'line_{}.xy'.format(
-                    _make_fields(fields, for_extract=False))), sep='\n')
-                vals = vals.reshape((-1, _num_fields(fields, for_extract=False) + 1))
+
+                composite_fields = None
+                for f in _field_iter(fields, for_extract=False):
+                    vals = np.fromfile(os.path.join(time, 'line_{}.xy'.format(
+                        _make_fields(f, for_extract=False))), sep='\n')
+                    vals = vals.reshape((-1, _num_fields(f, for_extract=False) + 1))
+                    indicies = np.array([1 + _field_index(x, f, for_extract=False)
+                                         for x in f])
+                    svals = vals[:, indicies]
+                    if composite_fields is None:
+                        composite_fields = np.hstack((
+                            np.expand_dims(vals[:, 0], 1), svals))
+                    else:
+                        composite_fields = np.hstack((composite_fields, svals))
+
                 nice_t = next(x for x in timelist if _timecheck(x, t))
-                results[nicecase][nice_t] = vals
+                results[nicecase][nice_t] = composite_fields
                 timev.add(float(nice_t))
         except FileNotFoundError:
             pass
         if not results[nicecase]:
             del results[nicecase]
 
+    return timev, results
+
+
+def plot(timev, results, show, grey=False):
+    marker_wheel = ['.', 'o', 'v', 's']
+    size_wheel = [6, 10, 14, 16]
+    cmap = 'Greys' if grey else 'inferno'
+    color_wheel = plt.get_cmap(cmap, len(size_wheel) + 1)
     try:
         os.mkdir('figs')
     except OSError:
         pass
-    for field in fields:
+    for index, field in enumerate(sorted(fields)):
         for time in sorted(timev):
-            ymin = np.finfo(np.float64).max
-            ymax = -np.finfo(np.float64).max
             for j, case in enumerate(results):
                 if time not in results[case]:
                     continue
                 vals = results[case][time]
                 if not vals.size:
                     continue
-                index = _field_index(field, fields, for_extract=False)
                 if case in name_map:
                     case = name_map[case]
-
-                ymin = np.minimum(ymin, np.min(vals[:, 1 + index]))
-                ymax = np.maximum(ymax, np.max(vals[:, 1 + index]))
                 plotter = plt.semilogy if islog(field) else plt.plot
                 plotter(vals[:, 0], vals[:, 1 + index], label=case,
                         linestyle='',
@@ -244,15 +271,9 @@ def plot(fields, timelist, show, grey=False):
             if show:
                 plt.show()
             plt.close()
-    return timev, results
 
 
 def validate(times, results, fields, base='SandiaD_LTS'):
-    indicies = []
-    for field in fields:
-        index = _field_index(field, fields, for_extract=False)
-        indicies.append(index)
-    indicies = np.array(indicies, dtype=np.int32)
     for time in times:
         comp = results[base][time]
         for case in results:
@@ -261,8 +282,8 @@ def validate(times, results, fields, base='SandiaD_LTS'):
             if time not in results[case]:
                 continue
             test = results[case][time]
-            diff = np.abs(comp[:, 1 + indicies] - test[:, 1 + indicies]) / (
-                1e-300 + np.abs(comp[:, 1 + indicies]))
+            diff = np.abs(comp[:, 1:] - test[:, 1:]) / (
+                1e-300 + np.abs(comp[:, 1:]))
             rel_err_inf = np.linalg.norm(
                 np.linalg.norm(diff, ord=np.inf, axis=1), ord=np.inf, axis=0)
             loc = np.where(rel_err_inf == diff)
@@ -285,11 +306,13 @@ def validate(times, results, fields, base='SandiaD_LTS'):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('valid.py - extract / plot data from Sandia '
                                      'Flame-D for valdation.')
+
+    species = ct.Solution('gri30.cti').species_names[:]
+    species[species.index('CH2(S)')] = 'CH2S'
+    fields = ['T', 'p', 'Qdot'] + species
     parser.add_argument('-f', '--fields',
                         nargs='+',
-                        default=['T', 'p', 'CH4', 'CO', 'CO2', 'N2', 'O',
-                                 'H', 'OH', 'HO2', 'H2O', 'NO', 'CH2O', 'HCO',
-                                 'N2O'],
+                        default=fields,
                         type=str,
                         required=False,
                         help='The fields to extract / plot')
@@ -336,12 +359,14 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    fields = sorted(args.fields)
     if args.extract:
-        extract(args.fields, args.times, args.cases, args.force_reextraction)
+        extract(fields, args.times, args.cases, args.force_reextraction)
     t = None
     results = None
+    if args.plot or args.validate:
+        t, results = load(fields, args.times)
     if args.plot:
-        t, results = plot(args.fields, args.times, args.show)
+        plot(t, results, args.show)
     if args.validate:
-        assert args.plot, "must plot to validate"
-        validate(t, results, args.fields)
+        validate(t, results, fields)
