@@ -51,18 +51,19 @@ Foam::CanteraSolver::CanteraSolver(const ODESystem& ode, const dictionary& dict)
     net_.reinitialize();
 }
 
-
 //- Solve num problems up to deltaT
 void Foam::CanteraSolver::solve
 (
     scalarField& c,
     scalar& T,
     scalar& p,
-    scalar& deltaT
+    scalar& deltaT,
+    scalar& subDeltaT
 )
 {
     // reset state
-    this->gas_.setState_TPX(T, p, &c[0]);
+    this->gas_.setConcentrations(&c[0]);
+    this->gas_.setState_TP(T, p);
     // reset reactor & net
     this->reac_.syncState();
     this->net_.setInitialTime(0);
@@ -73,6 +74,8 @@ void Foam::CanteraSolver::solve
     T = this->reac_.temperature();
     p = this->reac_.pressure();
     this->reac_.contents().getConcentrations(&c[0]);
+    // advance a single extra step to get an estimation of the current-stepsize
+    subDeltaT = this->net_.step();
 }
 
 

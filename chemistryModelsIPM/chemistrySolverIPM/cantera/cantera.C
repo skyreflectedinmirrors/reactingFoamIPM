@@ -57,7 +57,7 @@ void Foam::cantera<ChemistryModel>::solve
 {
 
     // pass off to cantera
-    odeSolver_->solve(c, T, p, deltaT);
+    odeSolver_->solve(c, T, p, deltaT, subDeltaT);
 }
 
 

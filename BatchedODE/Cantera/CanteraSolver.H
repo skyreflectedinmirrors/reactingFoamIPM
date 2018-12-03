@@ -90,7 +90,8 @@ public:
             scalarField& c,
             scalar& T,
             scalar& p,
-            scalar& deltaT
+            scalar& deltaT,
+            scalar& subDeltaT
         );
 
         //- Resize the ODE solver
