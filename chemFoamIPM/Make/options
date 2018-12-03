@@ -23,5 +23,11 @@ EXE_LIBS = \
     -lchemistryModelIPM \
     -lODE \
     -lBatchedODE \
+    -L$(PYJAC_LIB_PATH) \
+    -Wl,-rpath,$(PYJAC_LIB_PATH) \
+    -locl_pyjac \
+    -L$(CT_PATH) \
+    -lcantera \
+    -Wl,-rpath,$(CT_PATH) \
     -L$(IPM_LIBPATH) \
     -lipm

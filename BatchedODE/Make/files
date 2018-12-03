@@ -3,5 +3,6 @@ BatchedODESolver/BatchedODESolverNew.C
 AccelerInt/AccelerIntSolver.C
 CanteraODESolver/CanteraODESolver.C
 CanteraODESolver/CanteraODESolverNew.C
+Cantera/CanteraSolver.C
 
 LIB = $(FOAM_LIBBIN)/libBatchedODE

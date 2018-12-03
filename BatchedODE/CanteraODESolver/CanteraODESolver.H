@@ -36,12 +36,8 @@ SourceFiles
 #define CanteraODESolver_H
 
 #include "ODESystem.H"
-#include "UniformField.H"
 #include "typeInfo.H"
 #include "autoPtr.H"
-// cantera includes
-#include "cantera/IdealGasMix.h"
-#include "cantera/zerodim.h"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -76,15 +72,6 @@ protected:
 
         //- The maximum number of sub-steps allowed for the integration step
         label maxSteps_;
-
-        //- The gas object
-        Cantera::IdealGasMix gas_;
-
-        //- The reactor
-        Cantera::IdealGasConstPressureReactor reac_;
-
-        //- The reactor network
-        Cantera::ReactorNet net_;
 
 
     // Protected Member Functions
@@ -171,7 +158,7 @@ public:
             scalar& T,
             scalar& p,
             scalar& deltaT
-        );
+        ) = 0;
 };
 
 

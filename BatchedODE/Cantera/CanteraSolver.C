@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2018 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,76 +23,65 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "CanteraODESolver.H"
+#include "CanteraSolver.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(CanteraODESolver, 0);
-    defineRunTimeSelectionTable(CanteraODESolver, dictionary);
+    defineTypeNameAndDebug(CanteraSolver, 0);
+    addToRunTimeSelectionTable(CanteraODESolver, CanteraSolver, dictionary);
 }
-
-
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::CanteraODESolver::CanteraODESolver(const ODESystem& ode, const dictionary& dict)
+Foam::CanteraSolver::CanteraSolver(const ODESystem& ode, const dictionary& dict)
 :
-    odes_(ode),
-    maxN_(ode.nEqns()),
-    n_(ode.nEqns()),
-    absTol_(n_, dict.lookupOrDefault<scalar>("absTol", small)),
-    relTol_(n_, dict.lookupOrDefault<scalar>("relTol", 1e-4)),
-    maxSteps_(dict.lookupOrDefault<scalar>("maxSteps", 10000))
+    CanteraODESolver(ode, dict),
+    gas_(string(dict.lookup("ct_mechanism")))
 {
+    // add the gas to the reactor
+    reac_.insert(gas_);
 
+    // and initialize the reactor network
+    net_.setTolerances(absTol_[0], relTol_[0]);
+    net_.addReactor(reac_);
+    net_.integrator().setMaxSteps(maxSteps_);
+    net_.reinitialize();
 }
 
 
-Foam::CanteraODESolver::CanteraODESolver
+//- Solve num problems up to deltaT
+void Foam::CanteraSolver::solve
 (
-    const ODESystem& ode,
-    const scalarField& absTol,
-    const scalarField& relTol
+    scalarField& c,
+    scalar& T,
+    scalar& p,
+    scalar& deltaT
 )
-:
-    odes_(ode),
-    maxN_(ode.nEqns()),
-    n_(ode.nEqns()),
-    absTol_(absTol),
-    relTol_(relTol),
-    maxSteps_(10000)
-{}
+{
+    // reset state
+    this->gas_.setState_TPX(T, p, &c[0]);
+    // reset reactor & net
+    this->reac_.syncState();
+    this->net_.setInitialTime(0);
+    this->net_.reinitialize();
+    // and solver
+    this->net_.advance(deltaT);
+    // and copy back
+    T = this->reac_.temperature();
+    p = this->reac_.pressure();
+    this->reac_.contents().getConcentrations(&c[0]);
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::CanteraODESolver::resize()
+bool Foam::CanteraSolver::resize()
 {
-    if (odes_.nEqns() != n_)
-    {
-        if (odes_.nEqns() > maxN_)
-        {
-            FatalErrorInFunction
-                << "Specified number of equations " << odes_.nEqns()
-                << " greater than maximum " << maxN_
-                << abort(FatalError);
-        }
-
-        n_ = odes_.nEqns();
-
-        resizeField(absTol_);
-        resizeField(relTol_);
-
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return false;
 }
+
 
 // ************************************************************************* //
