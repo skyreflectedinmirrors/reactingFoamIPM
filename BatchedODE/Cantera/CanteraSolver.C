@@ -63,8 +63,7 @@ void Foam::CanteraSolver::solve
 )
 {
     // reset state
-    this->gas_.setConcentrations(&c[0]);
-    this->gas_.setState_TP(T, p);
+    this->gas_.setState_TPX(T, p, &c[0]);
     this->reac_.setInitialVolume(1);
     // reset reactor & net
     this->reac_.syncState();
@@ -75,8 +74,8 @@ void Foam::CanteraSolver::solve
     T = this->reac_.temperature();
     p = this->reac_.pressure();
     this->reac_.contents().getConcentrations(&c[0]);
-    // advance a single extra step to get an estimation of the current-stepsize
-    subDeltaT = this->net_.step();
+    // take "chemistry" step to be what the integrator would take next
+    subDeltaT = this->net_.integrator().nextStepSize();
 }
 
 
