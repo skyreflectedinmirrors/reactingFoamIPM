@@ -45,7 +45,7 @@ Foam::CanteraSolver::CanteraSolver(const ODESystem& ode, const dictionary& dict)
     reac_.insert(gas_);
 
     // and initialize the reactor network
-    net_.setTolerances(absTol_[0], relTol_[0]);
+    net_.setTolerances(relTol_[0], absTol_[0]);
     net_.addReactor(reac_);
     net_.integrator().setMaxSteps(maxSteps_);
     net_.reinitialize();
@@ -67,9 +67,8 @@ void Foam::CanteraSolver::solve
     // reset reactor & net
     this->reac_.syncState();
     this->net_.setInitialTime(0);
-    this->net_.reinitialize();
     // and solver
-    this->net_.advance(deltaT);
+    this->net_.advance(this->net_.time() + deltaT);
     // and copy back
     T = this->reac_.temperature();
     p = this->reac_.pressure();
