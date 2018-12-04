@@ -65,11 +65,10 @@ void Foam::CanteraSolver::solve
     // reset state
     this->gas_.setConcentrations(&c[0]);
     this->gas_.setState_TP(T, p);
+    this->reac_.setInitialVolume(1);
     // reset reactor & net
     this->reac_.syncState();
     this->net_.setInitialTime(0);
-    this->net_.setMaxTimeStep(deltaT);
-    this->net_.reinitialize();
     // and solver
     this->net_.advance(this->net_.time() + deltaT);
     // and copy back
