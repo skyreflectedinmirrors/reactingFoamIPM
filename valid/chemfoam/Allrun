@@ -1,0 +1,100 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # Run from this directory
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+# Set application name
+application=$(getApplication)
+
+runApplication chemkinToFoam \
+               chemkin/chem.inp chemkin/therm.dat chemkin/transportProperties \
+               constant/reactions constant/thermo
+
+# convert mechanism to ct format
+runApplication python -m cantera.ck2cti --input chemkin/chem.inp \
+    --thermo chemkin/therm.dat --output chemkin/chem.cti
+
+to_accelerint() {
+    # set the chemistry dict to use accelerint
+    foamDictionary -entry chemistryType.solver -set batched constant/chemistryProperties
+    foamDictionary -entry chemistryType.method -set batchedIPM constant/chemistryProperties
+    foamDictionary -entry odeCoeffs.solver -set AccelerInt constant/chemistryProperties
+    foamDictionary -entry odeCoeffs.accSolver -set ROS4 constant/chemistryProperties
+    foamDictionary -entry odeCoeffs.platform -set intel constant/chemistryProperties
+    foamDictionary -entry odeCoeffs.deviceType -set CPU constant/chemistryProperties
+    foamDictionary -entry odeCoeffs.vectorSize -set 8 constant/chemistryProperties
+    foamDictionary -entry odeCoeffs.absTol -set 1e-10 constant/chemistryProperties
+    foamDictionary -entry odeCoeffs.relTol -set 1e-06 constant/chemistryProperties
+}
+
+to_foam() {
+    # set the chemistry dict to use OpenFOAM
+    foamDictionary -entry chemistryType.solver -set ode constant/chemistryProperties
+    foamDictionary -entry chemistryType.method -set standard constant/chemistryProperties
+    foamDictionary -entry odeCoeffs.solver -set Rosenbrock34 constant/chemistryProperties
+    foamDictionary -entry odeCoeffs.absTol -set 1e-10 constant/chemistryProperties
+    foamDictionary -entry odeCoeffs.relTol -set 1e-06 constant/chemistryProperties
+}
+
+# equivalence ratios
+phivals=(1.0)
+# pressures = 1, 10 and 25 atm
+pressvals=(1013250)
+# initial temperatures
+tempvals=(1000 1500)
+
+endtime() {
+    if [ "$1" == 0.5 ]; then
+        local time="0.8"
+    elif [[ "$1" == 1 ]]; then
+        local time="0.4"
+    else
+        local time="0.1"
+    fi
+    echo "$time"
+}
+
+
+trap "echo failure; exit 1" ERR
+
+for pressure in $pressvals
+do
+    for temperature in $tempvals
+    do
+        for phi in $phivals
+        do
+            et=$(endtime "$phi")
+            echo "Endtime=$et"
+            # set state
+            foamDictionary -entry p -set $pressure constant/initialConditions
+            foamDictionary -entry T -set $temperature constant/initialConditions
+            foamDictionary -entry fractions.CH4 -set $phi constant/initialConditions
+            foamDictionary -entry endTime -set $et system/controlDict
+
+            # set foam
+            to_foam
+
+            # run foam case
+            runApplication -o $application
+            # move file to results for plotting
+            fname="validation/${pressure}_${temperature}_${phi}.foam"
+            mv chemFoam.out $fname
+
+            # set accelerint
+            to_accelerint
+            # run accel case
+            runApplication -o $application
+            # move file to results for plotting
+            fname="validation/${pressure}_${temperature}_${phi}.accel"
+            mv chemFoam.out $fname
+
+            # and call python script to plot
+            runApplication -o python validation/ct_plot.py --pressure=$pressure \
+                --temperature=$temperature --phi=$phi --endtime=$et
+
+        done
+    done
+done
+
+#------------------------------------------------------------------------------
