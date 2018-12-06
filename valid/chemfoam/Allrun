@@ -85,6 +85,12 @@ do
             foamDictionary -entry fractions.CH4 -set $phi constant/initialConditions
             foamDictionary -entry endTime -set $et system/controlDict
 
+            # limit initial and maximum timestep based on endtime
+            initial=$(echo "scale=10 ; $et / 10000.0" | bc)
+            max=$(echo "scale=10 ; $et / 100.0" | bc)
+            foamDictionary -entry deltaT -set "${initial}" system/controlDict
+            foamDictionary -entry maxDeltaT -set "${max}" system/controlDict
+
             # setup foam
             to_foam
 
