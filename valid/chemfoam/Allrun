@@ -46,15 +46,19 @@ to_chemfoam() {
 }
 
 # equivalence ratios
-phivals=(0.5 1.0 2.0)
+phivals=(0.6 1.0 1.4)
 # pressures = 1, 10 and 25 atm
 pressvals=(101325 1013250 2533125)
 # initial temperatures
-tempvals=(1000 1500)
+tempvals=(900 1200 1500)
 
 endtime() {
     local time=$(grep -Po "T=$1, P=$2, phi=$3, time=\K[^ ]+" runtimes)
     echo "$time"
+}
+
+min () {
+    echo $1 $2 | awk '{if ($1 > $2) {print $2} else {print $1}}';
 }
 
 
@@ -66,6 +70,12 @@ do
     do
         for phi in "${phivals[@]}";
         do
+            if [ "$temperature" = "900" ] && [ "$pressure" = "101325" ];
+            then
+                # skip case
+                continue
+            fi
+
             to_chemfoam
 
             et=$(endtime "$temperature" "$pressure" "$phi")
@@ -74,7 +84,7 @@ do
             # test to see if we've already run this case
             good_pressure=$(echo "scale=0 ; $pressure / 101325" | bc)
             test="${good_pressure}_${temperature}_${phi}".npz
-            if [ ! -f "$test" ];
+            if [ -f "$test" ];
             then
                 continue
             fi
@@ -86,10 +96,11 @@ do
             foamDictionary -entry endTime -set $et system/controlDict
 
             # limit initial and maximum timestep based on endtime
-            initial=$(echo "scale=10 ; $et / 10000.0" | bc)
-            max=$(echo "scale=10 ; $et / 100.0" | bc)
+            initial=$(echo "$et 100000.0" | awk '{printf "%.16f", $1 / $2}')
+            maxv=$(echo "$et 1000.0" | awk '{printf "%.16f", $1 / $2}')
+            maxv=$(min "$maxv" "1e-04")
             foamDictionary -entry deltaT -set "${initial}" system/controlDict
-            foamDictionary -entry maxDeltaT -set "${max}" system/controlDict
+            foamDictionary -entry maxDeltaT -set "${maxv}" system/controlDict
 
             # setup foam
             to_foam
