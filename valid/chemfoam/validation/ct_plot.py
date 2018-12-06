@@ -163,7 +163,7 @@ def find_nearest(array, values):
 
 def sample(times, arr, base_times, base, npoints=50, aspect_ratio=8.0 / 6.0,
            ylog=False):
-    skip = int(times.size / npoints)
+    skip = np.maximum(int(times.size / npoints), 1)
     return times[::skip], arr[::skip]
     interval = arc_length(base_times, base, aspect=aspect_ratio, ylog=ylog) / npoints
     indicies = arc_length(base_times, base, interval=interval, aspect=aspect_ratio,
