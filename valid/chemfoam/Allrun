@@ -71,6 +71,14 @@ do
             et=$(endtime "$temperature" "$pressure" "$phi")
             echo "Running case T=$temperature, P=$pressure, equivalence ratio=$phi"
             echo "Endtime=$et"
+            # test to see if we've already run this case
+            good_pressure=$(echo "scale=0 ; $pressure / 101325" | bc)
+            test="${good_pressure}_${temperature}_${phi}".npz
+            if [ ! -f "$test" ];
+            then
+                continue
+            fi
+
             # set state
             foamDictionary -entry p -set $pressure constant/initialConditions
             foamDictionary -entry T -set $temperature constant/initialConditions

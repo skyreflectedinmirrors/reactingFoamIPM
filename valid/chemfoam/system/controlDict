@@ -25,9 +25,9 @@ stopAt          endTime;
 
 endTime         0.2;
 
-deltaT          1e-05;
+deltaT          1e-08;
 
-maxDeltaT       1e-4;
+maxDeltaT       1e-05;
 
 adjustTimeStep  on;
 
