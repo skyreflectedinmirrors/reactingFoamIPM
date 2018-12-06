@@ -58,5 +58,6 @@ wmake chemistryModelsIPM
 wmake combustionModelsIPM
 wmake reactingFoamIPM
 wmake chemFoamIPM
+wmake testODE
 
 #------------------------------------------------------------------------------

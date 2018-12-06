@@ -37,12 +37,20 @@ to_foam() {
     foamDictionary -entry odeCoeffs.relTol -set 1e-06 constant/chemistryProperties
 }
 
+to_testode() {
+    foamDictionary -entry application -set testODE system/controlDict
+}
+
+to_chemfoam() {
+    foamDictionary -entry application -set chemFoamIPM system/controlDict
+}
+
 # equivalence ratios
 phivals=(1.0)
 # pressures = 1, 10 and 25 atm
-pressvals=(1013250)
+pressvals=(101325 1013250 2533125)
 # initial temperatures
-tempvals=(1000 1500)
+tempvals=(700, 1000 1500)
 
 endtime() {
     if [ "$1" == 0.5 ]; then
@@ -64,6 +72,8 @@ do
     do
         for phi in $phivals
         do
+            to_chemfoam
+
             et=$(endtime "$phi")
             echo "Endtime=$et"
             # set state
@@ -72,7 +82,7 @@ do
             foamDictionary -entry fractions.CH4 -set $phi constant/initialConditions
             foamDictionary -entry endTime -set $et system/controlDict
 
-            # set foam
+            # setup foam
             to_foam
 
             # run foam case
@@ -81,13 +91,27 @@ do
             fname="validation/${pressure}_${temperature}_${phi}.foam"
             mv chemFoam.out $fname
 
-            # set accelerint
+            # set up the TestODE app
+            to_testode
+            fname="validation/${pressure}_${temperature}_${phi}.foamode"
+            runApplication -o testODE
+            mv chemFoam.out $fname
+
+            # set accelerint & chemfoam
+            to_chemfoam
             to_accelerint
             # run accel case
             runApplication -o $application
             # move file to results for plotting
             fname="validation/${pressure}_${temperature}_${phi}.accel"
             mv chemFoam.out $fname
+
+                        # set up the TestODE app
+            to_testode
+            fname="validation/${pressure}_${temperature}_${phi}.accelode"
+            runApplication -o testODE
+            mv chemFoam.out $fname
+
 
             # and call python script to plot
             runApplication -o python validation/ct_plot.py --pressure=$pressure \

@@ -6,12 +6,13 @@
         << ", " << Y[0].name() << " = " << Y[0][0]
         << endl;
 
-    post<< setprecision(16) << runTime.value() << token::TAB << thermo.T()[0];
+    // and we output the state
+    post<< scientific << setprecision(16) << runTime.value() << token::TAB << thermo.T()[0];
 
     // and output all species
     forAll(Y, specieI)
     {
         post<< token::TAB;
-        post<< setprecision(16) << Y[specieI][0];
+        post<< scientific << setprecision(16) << Y[specieI][0];
     }
     post << nl;
