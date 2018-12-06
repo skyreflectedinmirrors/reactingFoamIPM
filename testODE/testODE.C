@@ -102,8 +102,8 @@ int main(int argc, char *argv[])
         scalarField pfield(1);
         scalarField dtChem_(1);
         dtChem_[0] = runTime.deltaT().value();
-
         pfield[0] = pi;
+
         for (label i=0; i<chemistry.nSpecie() - 1; i++)
         {
             phi[i + 2] = c_[i] * Vi;
@@ -113,12 +113,19 @@ int main(int argc, char *argv[])
             chemistry
         ).integrate(1, dt, phi, pfield, dtChem_);
 
+        // universal gas constant in J / (kmol * K) from pyJac
+        #define RU (8314.462)
         // and copy out
         Ti = phi[0];
+        Vi = phi[1];
+        scalar nNs = pi * Vi / (RU * Ti);
         for (label i=0; i<chemistry.nSpecie() - 1; i++)
         {
+            nNs -= phi[i + 2];
             c_[i] = phi[i + 2] / Vi;
         }
+        c_[chemistry.nSpecie() - 1] = nNs / Vi;
+        #undef RU
     }
 
 

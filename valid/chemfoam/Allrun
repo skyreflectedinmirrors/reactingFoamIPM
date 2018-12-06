@@ -46,35 +46,29 @@ to_chemfoam() {
 }
 
 # equivalence ratios
-phivals=(1.0)
+phivals=(0.5 1.0 2.0)
 # pressures = 1, 10 and 25 atm
 pressvals=(101325 1013250 2533125)
 # initial temperatures
-tempvals=(700, 1000 1500)
+tempvals=(1000 1500)
 
 endtime() {
-    if [ "$1" == 0.5 ]; then
-        local time="0.8"
-    elif [[ "$1" == 1 ]]; then
-        local time="0.4"
-    else
-        local time="0.1"
-    fi
+    local time=$(grep -Po "T=$1, P=$2, phi=$3, time=\K[^ ]+" runtimes)
     echo "$time"
 }
 
 
 trap "echo failure; exit 1" ERR
 
-for pressure in $pressvals
+for pressure in "${pressvals[@]}";
 do
-    for temperature in $tempvals
+    for temperature in "${tempvals[@]}";
     do
-        for phi in $phivals
+        for phi in "${phivals[@]}";
         do
             to_chemfoam
 
-            et=$(endtime "$phi")
+            et=$(endtime "$temperature" "$pressure" "$phi")
             echo "Endtime=$et"
             # set state
             foamDictionary -entry p -set $pressure constant/initialConditions

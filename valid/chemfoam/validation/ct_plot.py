@@ -4,6 +4,7 @@ import os
 import cantera as ct
 import numpy as np
 import matplotlib as mpl
+import sys
 # setup latex
 mpl.rc('text', usetex=True)
 mpl.rc('font', family='serif')
@@ -27,7 +28,7 @@ def ignition(pressure, temperature, phi, endtime):
 
     reac = ct.IdealGasConstPressureReactor(gas)
     net = ct.ReactorNet([reac])
-    lowtol = True
+    lowtol = False
     if lowtol:
         print('WARNING: LOW TOLERANCES IN PLACE')
         net.atol = 1e-10
@@ -137,8 +138,10 @@ def err(pressure, temperature, phi, endtime, to_plot):
         sample_args = {}
         if val == 'T':
             sample_args['percent_diff'] = 5
-        elif val in ['NO', 'OH']:
+        elif val == 'OH':
             sample_args['percent_diff'] = 100
+        elif val == 'NO':
+            sample_args['percent_diff'] = 250
 
         ylabel, ylog = label(val)
         plt.plot(phi_ct[:, 0], phi_ct[:, 1 + ind],
@@ -193,3 +196,5 @@ if __name__ == '__main__':
                         default=['T', 'CH4', 'OH', 'HO2', 'NO'])
     args = parser.parse_args()
     err(args.pressure, args.temperature, args.phi, args.endtime, args.to_plot)
+
+    sys.exit(0)
