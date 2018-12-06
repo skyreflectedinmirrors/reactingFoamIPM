@@ -69,6 +69,7 @@ do
             to_chemfoam
 
             et=$(endtime "$temperature" "$pressure" "$phi")
+            echo "Running case T=$temperature, P=$pressure, equivalence ratio=$phi"
             echo "Endtime=$et"
             # set state
             foamDictionary -entry p -set $pressure constant/initialConditions
@@ -114,5 +115,10 @@ do
         done
     done
 done
+
+# finally run the error normer to get the final outout
+runApplication -o python err_normer.py
+# and move the log file to a nicer namer (that won't get cleaned?)
+mv log.python results.log
 
 #------------------------------------------------------------------------------

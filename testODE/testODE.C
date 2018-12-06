@@ -70,75 +70,93 @@ int main(int argc, char *argv[])
     // however, then we ditch the weird time-stepping scheme and simply solve
     // to the end time to compare to cantera
 
-    scalarField c_(chemistry.nSpecie());
+    scalarField cbase(chemistry.nSpecie());
     scalar Ti = T0;
+    scalar pi = p[0];
 
     const scalar rhoi = rho[0];
-    scalar pi = p[0];
 
     for (label i=0; i<chemistry.nSpecie(); i++)
     {
-        c_[i] = rhoi*Y[i][0]/W[i];
+        cbase[i] = rhoi*Y[i][0]/W[i];
     }
 
     // Initialise time progress
-    scalar dt = runTime.endTime().value();
+    scalar endtime = runTime.endTime().value();
 
-    // Calculate the chemical source terms
-    if (isA<StandardChemistryModel<rhoReactionThermo, gasHThermoPhysics>>(chemistry))
+    label nPoints = 10;
+    for (label i = 1; i <= nPoints; ++i)
     {
-        refCast<const StandardChemistryModel<rhoReactionThermo, gasHThermoPhysics>>
-        (
-            chemistry
-        ).solve(c_, Ti, pi, dt, runTime.deltaT().value());
-    }
-    else
-    {
-        // copy into batched form
-        scalarField phi(chemistry.nSpecie() + 1);
-        phi[0] = Ti;
+        scalar dt = endtime * (static_cast<scalar>(i) / static_cast<scalar>(nPoints));
+
+        // copy concentrations & reset state
+        Ti = T0;
+        pi = p[0];
         scalar Vi = mesh.V()[0];
-        phi[1] = Vi;
-        scalarField pfield(1);
-        scalarField dtChem_(1);
-        dtChem_[0] = runTime.deltaT().value();
-        pfield[0] = pi;
-
-        for (label i=0; i<chemistry.nSpecie() - 1; i++)
+        scalarField c_(cbase.size());
+        forAll(cbase, specieI)
         {
-            phi[i + 2] = c_[i] * Vi;
+            c_[specieI] = cbase[specieI];
         }
-        refCast<const BatchedChemistryModel<rhoReactionThermo, gasHThermoPhysics>>
-        (
-            chemistry
-        ).integrate(1, dt, phi, pfield, dtChem_);
 
-        // universal gas constant in J / (kmol * K) from pyJac
-        #define RU (8314.462)
-        // and copy out
-        Ti = phi[0];
-        Vi = phi[1];
-        scalar nNs = pi * Vi / (RU * Ti);
-        for (label i=0; i<chemistry.nSpecie() - 1; i++)
+        // Calculate the chemical source terms
+        if (isA<StandardChemistryModel<rhoReactionThermo, gasHThermoPhysics>>(chemistry))
         {
-            nNs -= phi[i + 2];
-            c_[i] = phi[i + 2] / Vi;
+            refCast<const StandardChemistryModel<rhoReactionThermo, gasHThermoPhysics>>
+            (
+                chemistry
+            ).solve(c_, Ti, pi, dt, runTime.deltaT().value());
         }
-        c_[chemistry.nSpecie() - 1] = nNs / Vi;
-        #undef RU
+        else
+        {
+            // copy into batched form
+            scalarField phi(chemistry.nSpecie() + 1);
+            phi[0] = Ti;
+            phi[1] = Vi;
+            scalarField pfield(1);
+            scalarField dtChem_(1);
+            dtChem_[0] = runTime.deltaT().value();
+            pfield[0] = pi;
+
+            for (label i=0; i<chemistry.nSpecie() - 1; i++)
+            {
+                phi[i + 2] = c_[i] * Vi;
+            }
+            refCast<const BatchedChemistryModel<rhoReactionThermo, gasHThermoPhysics>>
+            (
+                chemistry
+            ).integrate(1, dt, phi, pfield, dtChem_);
+
+            // universal gas constant in J / (kmol * K) from pyJac
+            #define RU (8314.462)
+            // and copy out
+            Ti = phi[0];
+            Vi = phi[1];
+            scalar nNs = pi * Vi / (RU * Ti);
+            for (label i=0; i<chemistry.nSpecie() - 1; i++)
+            {
+                nNs -= phi[i + 2];
+                c_[i] = phi[i + 2] / Vi;
+            }
+            c_[chemistry.nSpecie() - 1] = nNs / Vi;
+            #undef RU
+        }
+
+        // and write to the file
+        post<< scientific << setprecision(16) << dt << token::TAB << Ti;
+
+        // and output all species
+        forAll(c_, specieI)
+        {
+            post<< token::TAB;
+            post<< scientific << setprecision(16) << c_[specieI];
+        }
+        post << nl;
+
     }
 
 
-    // and write to the file
-    post<< scientific << setprecision(16) << Ti;
 
-    // and output all species
-    forAll(c_, specieI)
-    {
-        post<< token::TAB;
-        post<< scientific << setprecision(16) << c_[specieI];
-    }
-    post << nl;
 
     return 0;
 }
