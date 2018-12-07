@@ -13,7 +13,7 @@ mpl.rc('text.latex',
        preamble=r'\usepackage{amsmath}'
                 r'\usepackage[version=4]{mhchem}')
 mpl.rc('font', family='serif')
-import matplotlib.pyplot as plt # noqa
+import matplotlib.pyplot as plt  # noqa
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -78,19 +78,52 @@ def err_norm(test, ct, norm=2):
     return err
 
 
+def truncate_cmap(cmap, n_min=0, n_max=256, n=4):
+    """ Generate a truncated colormap
+
+    Colormaps have a certain number of colors (usually 255) which is
+    available via cmap.N
+
+    This is a simple function which returns a new color map from a
+    subset of the input colormap. For example, if you only want the jet
+    colormap up to green colors you may use
+    tcmap = truncate_cmap(plt.cm.jet,n_max=150)
+    This function is especially useful when you want to remove the white
+    bounds of a colormap
+
+    Parameters
+    cmap : plt.matplotlib.colors.Colormap
+    n_min : int
+    n_max : int
+
+    Return
+    truncated_cmap : plt.matplotlib.colors.Colormap
+
+    https://gist.github.com/astrodsg/09bfac1b68748967ed8b#file-mpl_colormap_tools
+    """
+    color_index = (n_min + (n_max - n_min) * np.linspace(0, 1, n)).astype(int)
+    colors = cmap(color_index)
+    name = "truncated_{}".format(cmap.name)
+    return plt.matplotlib.colors.ListedColormap(colors, name=name)
+
+
+def get_color(index):
+    ncolors = 4
+    color_wheel = plt.cm.inferno
+    crange = 210
+    color_wheel = truncate_cmap(color_wheel, n_max=crange, n=ncolors)
+    return color_wheel(index % ncolors)
+
+
 def wheel(index):
     marker_wheel = ['.', 'o', 'v', 's']
-    size_wheel = [6, 10, 14, 16]
-    cmap = 'inferno'
-    ncolors = 4
-    color_wheel = plt.get_cmap(cmap, ncolors)
-
-    style = {'color': color_wheel(index % ncolors)}
+    size_wheel = [12, 15]
+    style = {'color': get_color(index)}
     if index:
         style.update({
             'linestyle': '',
-            'marker': marker_wheel[index % len(marker_wheel)],
-            'markersize': size_wheel[index % len(size_wheel)],
+            'marker': marker_wheel[(index - 1) % len(marker_wheel)],
+            'markersize': size_wheel[(index - 1) % len(size_wheel)],
             'markerfacecolor': 'none'})
 
     return style
@@ -161,20 +194,37 @@ def find_nearest(array, values):
     return indicies
 
 
-def sample(times, arr, base_times, base, npoints=50, aspect_ratio=8.0 / 6.0,
-           ylog=False):
-    skip = np.maximum(int(times.size / npoints), 1)
-    return times[::skip], arr[::skip]
-    interval = arc_length(base_times, base, aspect=aspect_ratio, ylog=ylog) / npoints
-    indicies = arc_length(base_times, base, interval=interval, aspect=aspect_ratio,
-                          ylog=ylog)
-    bvals = base[indicies]
-    # find the points in array that are closest to the base vals
-    indicies = find_nearest(arr, bvals)
-    return times[np.array(indicies)], arr[np.array(indicies)]
+def slice(times, arr, skip, percent_diff=10):
+    last = arr[0]
+    indicies = [0]
+    for i, point in enumerate(arr):
+        if i - indicies[-1] >= skip or (100. * np.abs(
+                last - point) / last) > percent_diff:
+            indicies.append(i)
+            last = point
+
+    indicies = np.array(indicies)
+    return times[indicies], arr[indicies]
 
 
-def err(pressure, temperature, phi, endtime, to_plot):
+def sample(times, arr, base_times, base, npoints=75, aspect_ratio=8.0 / 6.0,
+           thin_mode='slice'):
+
+    if thin_mode == 'slice':
+        skip = np.maximum(int(times.size / npoints), 1)
+        return slice(times, arr, skip)
+    else:
+        interval = arc_length(base_times, base, aspect=aspect_ratio) / npoints
+        indicies = arc_length(base_times, base, interval=interval,
+                              aspect=aspect_ratio)
+        bvals = base[indicies]
+        # find the points in array that are closest to the base vals
+        indicies = find_nearest(arr, bvals)
+        return times[np.array(indicies)], arr[np.array(indicies)]
+
+
+def err(pressure, temperature, phi, endtime, to_plot,
+        draw_samples, thin_mode, do_err=True):
     gas = get_gas()
     acc = np.loadtxt(os.path.join(script_dir, '{}_{}_{}.accelode'.format(
                      int(pressure), int(temperature), float(phi))),
@@ -185,17 +235,19 @@ def err(pressure, temperature, phi, endtime, to_plot):
 
     sample_times = acc[:, 0]
     assert np.allclose(sample_times, OF[:, 0])
-    # get temperature comparison
-    comp_ct = ignition(pressure, temperature, phi, sample_times=sample_times)
-    errs = {}
-    errs['n_samples'] = OF[:, 0].size
-    errs['of_err_mean'] = err_norm(OF, comp_ct, norm=2)
-    errs['ai_err_mean'] = err_norm(acc, comp_ct, norm=2)
-    errs['of_err_inf'] = err_norm(OF, comp_ct, norm=np.inf)
-    errs['ai_err_inf'] = err_norm(acc, comp_ct, norm=np.inf)
-    filename = '{}_{}_{}.npz'.format(int(pressure / ct.one_atm), int(temperature),
-                                     float(phi))
-    np.savez(filename, **errs)
+    if do_err:
+        # get temperature comparison
+        comp_ct = ignition(pressure, temperature, phi,
+                           sample_times=sample_times)
+        errs = {}
+        errs['n_samples'] = OF[:, 0].size
+        errs['of_err_mean'] = err_norm(OF, comp_ct, norm=2)
+        errs['ai_err_mean'] = err_norm(acc, comp_ct, norm=2)
+        errs['of_err_inf'] = err_norm(OF, comp_ct, norm=np.inf)
+        errs['ai_err_inf'] = err_norm(acc, comp_ct, norm=np.inf)
+        filename = '{}_{}_{}.npz'.format(int(pressure / ct.one_atm),
+                                         int(temperature), float(phi))
+        np.savez(filename, **errs)
 
     # load plotter's
     phi_ct = ignition(pressure, temperature, phi, endtime=endtime)
@@ -207,18 +259,23 @@ def err(pressure, temperature, phi, endtime, to_plot):
                     delimiter='\t', skiprows=1).reshape((-1, gas.n_species + 2))
 
     for val in to_plot:
+        if draw_samples:
+            for x in sample_times:
+                plt.axvline(x=x, linestyle='--', color=get_color(3))
         ind = (['T'] + gas.species_names).index(val)
         ylabel, ylog = label(val)
         plt.plot(phi_ct[:, 0], phi_ct[:, 1 + ind],
                  label='Cantera', **wheel(0))
         plt.plot(*sample(acc[:, 0], acc[:, 1 + ind],
                          phi_ct[:, 0], phi_ct[:, 1 + ind],
-                         ylog=ylog),
-                 label=r'\texttt{accelerInt}', **wheel(1))
+                         thin_mode=thin_mode),
+                 label=r'\texttt{accelerInt}', **wheel(1),
+                 zorder=2)
         plt.plot(*sample(OF[:, 0], OF[:, 1 + ind],
                          phi_ct[:, 0], phi_ct[:, 1 + ind],
-                         ylog=ylog),
-                 label=r'\texttt{OpenFOAM}', **wheel(2))
+                         thin_mode=thin_mode),
+                 label=r'\texttt{OpenFOAM}', **wheel(2),
+                 zorder=1)
         plt.xlabel('Time (s)')
         plt.ylabel(ylabel)
         if ylog:
@@ -228,8 +285,8 @@ def err(pressure, temperature, phi, endtime, to_plot):
                       'numpoints': 1,
                       'shadow': True,
                       'fancybox': True})
-        plt.tick_params(axis='both', which='major', labelsize=20)
-        plt.tick_params(axis='both', which='minor', labelsize=16)
+        plt.tick_params(axis='both', which='major', labelsize=18)
+        plt.tick_params(axis='both', which='minor', labelsize=14)
         for item in (plt.gca().title, plt.gca().xaxis.label,
                      plt.gca().yaxis.label):
             item.set_fontsize(24)
@@ -260,10 +317,27 @@ if __name__ == '__main__':
                         type=float,
                         help='The simulation endtime.',
                         required=True)
-    parser.add_argument('-t', '--to_plot',
+    parser.add_argument('-tp', '--to_plot',
                         nargs='+',
                         default=['T', 'CH4', 'OH', 'HO2', 'NO'])
+    parser.add_argument('-s', '--draw_sample_times',
+                        action='store_true',
+                        required=False,
+                        default=False,
+                        help='Draw the samples tested for the error-norm.')
+    parser.add_argument('-th', '--thin_mode',
+                        choices=['arclen', 'slice'],
+                        required=False,
+                        default='slice',
+                        help='The method used to thin the data such that the plot '
+                             'is more readable.')
+    parser.add_argument('-n', '--no_error',
+                        action='store_true',
+                        required=False,
+                        default=False,
+                        help='Plot only.')
     args = parser.parse_args()
-    err(args.pressure, args.temperature, args.phi, args.endtime, args.to_plot)
+    err(args.pressure, args.temperature, args.phi, args.endtime, args.to_plot,
+        args.draw_sample_times, args.thin_mode, not args.no_error)
 
     sys.exit(0)

@@ -18,12 +18,12 @@ for T in [850, 1100, 1500]:
             t_ign = net.time * 1.25
             # ensure ignited
             net.advance(t_ign)
-            if reac.T <= 2000:
+            if reac.T <= 2000 and t_ign < 10:
                 # give it one more try
-                t_ign = t_ign * 1.5
+                t_ign = 10
                 net.advance(t_ign)
 
-            if reac.T <= 2000 or t_ign > 5:
+            if reac.T <= 2000 or t_ign > 10:
                 print('Skipping: T={}, P={:.0f}, phi={:.1f}, time={}'.format(
                     T, p*ct.one_atm, phi, t_ign))
                 continue
