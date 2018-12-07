@@ -203,16 +203,20 @@ def slice(times, arr, skip, percent_diff=10):
             indicies.append(i)
             last = point
 
+    # and include the last point, if not there
+    if indicies[-1] != arr.size - 1:
+        indicies.append(arr.size - 1)
+
     indicies = np.array(indicies)
     return times[indicies], arr[indicies]
 
 
 def sample(times, arr, base_times, base, npoints=75, aspect_ratio=8.0 / 6.0,
-           thin_mode='slice'):
+           thin_mode='slice', percent_diff=10):
 
     if thin_mode == 'slice':
         skip = np.maximum(int(times.size / npoints), 1)
-        return slice(times, arr, skip)
+        return slice(times, arr, skip, percent_diff=percent_diff)
     else:
         interval = arc_length(base_times, base, aspect=aspect_ratio) / npoints
         indicies = arc_length(base_times, base, interval=interval,
@@ -224,7 +228,8 @@ def sample(times, arr, base_times, base, npoints=75, aspect_ratio=8.0 / 6.0,
 
 
 def err(pressure, temperature, phi, endtime, to_plot,
-        draw_samples, thin_mode, do_err=True):
+        draw_samples, thin_mode, do_err=True, ymin=None, thin_rate=75,
+        thin_percent=10):
     gas = get_gas()
     acc = np.loadtxt(os.path.join(script_dir, '{}_{}_{}.accelode'.format(
                      int(pressure), int(temperature), float(phi))),
@@ -265,31 +270,36 @@ def err(pressure, temperature, phi, endtime, to_plot,
         ind = (['T'] + gas.species_names).index(val)
         ylabel, ylog = label(val)
         plt.plot(phi_ct[:, 0], phi_ct[:, 1 + ind],
-                 label='Cantera', **wheel(0))
+                 label='Cantera', **wheel(0),
+                 zorder=3)
         plt.plot(*sample(acc[:, 0], acc[:, 1 + ind],
                          phi_ct[:, 0], phi_ct[:, 1 + ind],
-                         thin_mode=thin_mode),
+                         thin_mode=thin_mode, npoints=thin_rate,
+                         percent_diff=thin_percent),
                  label=r'\texttt{accelerInt}', **wheel(1),
                  zorder=2)
         plt.plot(*sample(OF[:, 0], OF[:, 1 + ind],
                          phi_ct[:, 0], phi_ct[:, 1 + ind],
-                         thin_mode=thin_mode),
+                         thin_mode=thin_mode, npoints=thin_rate,
+                         percent_diff=thin_percent),
                  label=r'\texttt{OpenFOAM}', **wheel(2),
                  zorder=1)
         plt.xlabel('Time (s)')
         plt.ylabel(ylabel)
         if ylog:
             plt.yscale('log')
+        if ymin:
+            plt.ylim((ymin, None))
         plt.legend(**{'loc': 0,
-                      'fontsize': 16,
+                      'fontsize': 18,
                       'numpoints': 1,
                       'shadow': True,
                       'fancybox': True})
-        plt.tick_params(axis='both', which='major', labelsize=18)
+        plt.tick_params(axis='both', which='major', labelsize=22)
         plt.tick_params(axis='both', which='minor', labelsize=14)
         for item in (plt.gca().title, plt.gca().xaxis.label,
                      plt.gca().yaxis.label):
-            item.set_fontsize(24)
+            item.set_fontsize(28)
         plt.tight_layout()
         plt.savefig('{}_{}_{}_{}.pdf'.format(
             int(pressure / ct.one_atm), int(temperature), phi,
@@ -309,7 +319,7 @@ if __name__ == '__main__':
                         type=float,
                         help='The temperature used.',
                         required=True)
-    parser.add_argument('-phi', '--phi',
+    parser.add_argument('--phi',
                         type=float,
                         help='The equivalence ratio used.',
                         required=True)
@@ -317,7 +327,7 @@ if __name__ == '__main__':
                         type=float,
                         help='The simulation endtime.',
                         required=True)
-    parser.add_argument('-tp', '--to_plot',
+    parser.add_argument('-p', '--to_plot',
                         nargs='+',
                         default=['T', 'CH4', 'OH', 'HO2', 'NO'])
     parser.add_argument('-s', '--draw_sample_times',
@@ -336,8 +346,22 @@ if __name__ == '__main__':
                         required=False,
                         default=False,
                         help='Plot only.')
+    parser.add_argument('-ymin', '--ymin',
+                        default=None,
+                        type=float,
+                        help='The lower bound of the graph.')
+    parser.add_argument('-tr', '--thin_rate',
+                        default=75,
+                        type=int,
+                        help='The nominal number of points in `slice` mode.')
+    parser.add_argument('-tp', '--thin_percent',
+                        default=10,
+                        type=int,
+                        help='The allowed % difference between successive plotted'
+                             'points in `slice` mode.')
     args = parser.parse_args()
     err(args.pressure, args.temperature, args.phi, args.endtime, args.to_plot,
-        args.draw_sample_times, args.thin_mode, not args.no_error)
+        args.draw_sample_times, args.thin_mode, not args.no_error, args.ymin,
+        args.thin_rate, args.thin_percent)
 
     sys.exit(0)
