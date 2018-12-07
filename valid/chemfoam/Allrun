@@ -101,6 +101,7 @@ do
             maxv=$(min "$maxv" "1e-04")
             foamDictionary -entry deltaT -set "${initial}" system/controlDict
             foamDictionary -entry maxDeltaT -set "${maxv}" system/controlDict
+            foamDictionary -entry maxChemicalTimeStep -set "${maxv}" constant/chemistryProperties
 
             # setup foam
             to_foam
@@ -117,6 +118,10 @@ do
             runApplication -o testODE
             mv chemFoam.out $fname
 
+            # run sanity check
+            runApplication -o python sanity_check.py --log=log.testODE \
+                --temperature=$temperature --pressure=$pressure --phi=$phi
+
             # set accelerint & chemfoam
             to_chemfoam
             to_accelerint
@@ -132,10 +137,18 @@ do
             runApplication -o testODE
             mv chemFoam.out $fname
 
+            # run sanity check
+            runApplication -o python sanity_check.py --log=log.testODE \
+                --temperature=$temperature --pressure=$pressure --phi=$phi
+
 
             # and call python script to plot
             runApplication -o python validation/ct_plot.py --pressure=$pressure \
                 --temperature=$temperature --phi=$phi --endtime=$et
+
+
+            # and remove time so that we don't end up with the wrong state
+            runApplication foamListTimes -rm
 
         done
     done

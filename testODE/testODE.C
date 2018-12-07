@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createSingleCellMesh.H"
-    #include "createFields.H"
+    #include "createReusableFields.H"
     #include "createFieldRefs.H"
     #include "readInitialConditions.H"
     #include "createControls.H"
@@ -72,13 +72,18 @@ int main(int argc, char *argv[])
 
     scalarField cbase(chemistry.nSpecie());
     scalar Ti = T0;
-    scalar pi = p[0];
+    scalar pi = p0;
+
+    Info << "Temperature=" << T0 << nl;
+    Info << "Pressure=" << p0 << nl;
+    Info << "rho=" << rho[0] << nl;
 
     const scalar rhoi = rho[0];
 
     for (label i=0; i<chemistry.nSpecie(); i++)
     {
-        cbase[i] = rhoi*Y[i][0]/W[i];
+        cbase[i] = rhoi*Y0[i]/W[i];
+        Info << "concentration[" << i << "]=" << cbase[i] << nl;
     }
 
     // Initialise time progress
@@ -91,7 +96,7 @@ int main(int argc, char *argv[])
 
         // copy concentrations & reset state
         Ti = T0;
-        pi = p[0];
+        pi = p0;
         scalar Vi = mesh.V()[0];
         scalarField c_(cbase.size());
         forAll(cbase, specieI)

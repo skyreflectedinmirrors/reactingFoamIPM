@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createSingleCellMesh.H"
-    #include "createFields.H"
+    #include "createReusableFields.H"
     #include "createFieldRefs.H"
     #include "readInitialConditions.H"
     #include "createControls.H"
