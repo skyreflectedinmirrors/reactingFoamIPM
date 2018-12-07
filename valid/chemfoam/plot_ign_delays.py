@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 gas = ct.Solution('gri30.cti')
 
 for p in [1, 10, 25]:
-    for phi in [0.6, 1, 1.4]:
+    for phi in [0.5, 1, 1.5]:
         temperatures = np.arange(850, 1500, 25, dtype=np.float64)
         ign_delays = np.zeros_like(temperatures)
         for i, T in enumerate(temperatures):

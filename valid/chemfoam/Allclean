@@ -8,5 +8,7 @@ cleanCase
 
 rm -rf 0 chemFoam.out constant/reactions constant/thermo \
    validation/OF_vs_CHEMKINII.eps validation/chemkinII
+rm -rf validation/*.accel validation/*.accelode
+rm -rf validation/*.foam validation/*.foamode
 
 #------------------------------------------------------------------------------
