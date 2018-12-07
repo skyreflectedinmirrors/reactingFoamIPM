@@ -212,7 +212,12 @@ def slice(times, arr, skip, percent_diff=10):
 
 
 def sample(times, arr, base_times, base, npoints=75, aspect_ratio=8.0 / 6.0,
-           thin_mode='slice', percent_diff=10):
+           thin_mode='slice', percent_diff=10, xrangev=None):
+
+    if isinstance(xrangev, np.ndarray):
+        times = times[xrangev[0]:xrangev[1]]
+        arr = arr[xrangev[0]:xrangev[1]]
+        base_times = base_times[xrangev[0]:xrangev[1]]
 
     if thin_mode == 'slice':
         skip = np.maximum(int(times.size / npoints), 1)
@@ -229,7 +234,7 @@ def sample(times, arr, base_times, base, npoints=75, aspect_ratio=8.0 / 6.0,
 
 def err(pressure, temperature, phi, endtime, to_plot,
         draw_samples, thin_mode, do_err=True, ymin=None, thin_rate=75,
-        thin_percent=10):
+        thin_percent=10, xmin=None, xmax=None):
     gas = get_gas()
     acc = np.loadtxt(os.path.join(script_dir, '{}_{}_{}.accelode'.format(
                      int(pressure), int(temperature), float(phi))),
@@ -272,16 +277,26 @@ def err(pressure, temperature, phi, endtime, to_plot,
         plt.plot(phi_ct[:, 0], phi_ct[:, 1 + ind],
                  label='Cantera', **wheel(0),
                  zorder=3)
+
+        xrangev = None
+        if xmin and xmax:
+            xrangev = find_nearest(acc[:, 0], np.array([xmin, xmax]))
         plt.plot(*sample(acc[:, 0], acc[:, 1 + ind],
                          phi_ct[:, 0], phi_ct[:, 1 + ind],
                          thin_mode=thin_mode, npoints=thin_rate,
-                         percent_diff=thin_percent),
+                         percent_diff=thin_percent,
+                         xrangev=xrangev),
                  label=r'\texttt{accelerInt}', **wheel(1),
                  zorder=2)
+
+        xrangev = None
+        if xmin and xmax:
+            xrangev = find_nearest(OF[:, 0], np.array([xmin, xmax]))
         plt.plot(*sample(OF[:, 0], OF[:, 1 + ind],
                          phi_ct[:, 0], phi_ct[:, 1 + ind],
                          thin_mode=thin_mode, npoints=thin_rate,
-                         percent_diff=thin_percent),
+                         percent_diff=thin_percent,
+                         xrangev=xrangev),
                  label=r'\texttt{OpenFOAM}', **wheel(2),
                  zorder=1)
         plt.xlabel('Time (s)')
@@ -290,6 +305,8 @@ def err(pressure, temperature, phi, endtime, to_plot,
             plt.yscale('log')
         if ymin:
             plt.ylim((ymin, None))
+        if xmin or xmax:
+            plt.xlim((xmin, xmax))
         plt.legend(**{'loc': 0,
                       'fontsize': 18,
                       'numpoints': 1,
@@ -350,6 +367,14 @@ if __name__ == '__main__':
                         default=None,
                         type=float,
                         help='The lower bound of the graph.')
+    parser.add_argument('-xmin', '--xmin',
+                        default=None,
+                        type=float,
+                        help='The lower bound of the graph.')
+    parser.add_argument('-xmax', '--xmax',
+                        default=None,
+                        type=float,
+                        help='The upper bound of the graph.')
     parser.add_argument('-tr', '--thin_rate',
                         default=75,
                         type=int,
@@ -362,6 +387,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     err(args.pressure, args.temperature, args.phi, args.endtime, args.to_plot,
         args.draw_sample_times, args.thin_mode, not args.no_error, args.ymin,
-        args.thin_rate, args.thin_percent)
+        args.thin_rate, args.thin_percent, args.xmin, args.xmax)
 
     sys.exit(0)
