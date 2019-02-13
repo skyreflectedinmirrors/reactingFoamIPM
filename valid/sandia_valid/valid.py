@@ -342,7 +342,7 @@ def plot(timev, results, grey=False, base='SandiaD_LTS_accelerint'):
                 plt.tight_layout()
                 plt.savefig(os.path.join('figs', '{field}_{slice}_{time}.pdf'.format(
                     time=time, field=field, slice=xslice)),
-                            bbox_inches='tight')
+                    bbox_inches='tight')
                 plt.close()
 
 
@@ -475,6 +475,7 @@ if __name__ == '__main__':
     parser.add_argument('-t', '--times',
                         nargs='+',
                         default=[5000, 5000.01],
+                        type=float,
                         help='The times to plot / extract.')
 
     parser.add_argument('-c', '--cases',
