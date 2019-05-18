@@ -1,8 +1,4 @@
-TO_PATH=`pwd`/testODE/ \
-CF_PATH=`pwd`/chemFoamIPM/ \
-WRAPPER_PATH=`pwd`/BatchedODE/AccelerInt/ \
-CHEM_PATH=`pwd`/chemistryModelsIPM/ \
-BATCHED_PATH=`pwd`/BatchedODE/BatchedODESystem/ \
+BASE_PATH=`pwd` \
 CL_INC_DIR=/opt/opencl-headers/ \
 PYJAC_PATH=`pwd`/include/ \
 PYJAC_LIB_PATH=`pwd`/lib/ \

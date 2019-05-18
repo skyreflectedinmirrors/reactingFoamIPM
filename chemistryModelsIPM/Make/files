@@ -1,4 +1,4 @@
 BasicChemistryModelIPM/BasicChemistryModelsIPM.C
 chemistrySolverIPM/makeChemistrySolversIPM.C
 
-LIB = $(FOAM_LIBBIN)/libchemistryModelIPM
+LIB = $(FOAM_LIBBIN)/libchemistryModelIPM$(MODEL_NAME)

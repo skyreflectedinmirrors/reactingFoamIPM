@@ -2,4 +2,4 @@ BatchedODESolver/BatchedODESolver.C
 BatchedODESolver/BatchedODESolverNew.C
 AccelerInt/AccelerIntSolver.C
 
-LIB = $(FOAM_LIBBIN)/libBatchedODE
+LIB = $(FOAM_LIBBIN)/libBatchedODE$(MODEL_NAME)

@@ -11,9 +11,9 @@ EXE_INC = \
     -I$(WM_PROJECT_DIR)/applications/solvers/combustion/chemFoam/ \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
-    -I$(TO_PATH)/ \
-    -I$(CHEM_PATH)/BatchedChemistryModel/ \
-    -I$(BATCHED_PATH)/ \
+    -I$(BASE_PATH)/testODE/ \
+    -I$(BASE_PATH)/chemistryModelsIPM/BatchedChemistryModel/ \
+    -I$(BASE_PATH)/BatchedODE/BatchedODESystem/ \
     $(PFLAGS) \
     $(PINC)
 

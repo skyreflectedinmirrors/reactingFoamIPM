@@ -34,8 +34,8 @@ cd ${0%/*} || exit 1    # Run from this directory
     exit 1
 }
 
-[ -n "$WRAPPER_PATH" ] || {
-    echo "Allwmake error: WRAPPER_PATH not set"
+[ -n "$BASE_PATH" ] || {
+    echo "Allwmake error: BASE_PATH not set"
     echo "    Set this environment variable to enable proper compilation"
     exit 1
 }
@@ -51,6 +51,13 @@ cd ${0%/*} || exit 1    # Run from this directory
     echo "    Check the OpenFOAM entries in your dot-files and source them."
     exit 1
 }
+
+if [ -n "$MODEL_NAME" ]; then
+    MODEL_NAME="_" + $MODEL_NAME
+else
+    echo "Model name not defined, will overwrite any previously compiled "
+    echo "reactingFoamIPM versions."
+fi
 
 # Compile supporting libraries
 wmake BatchedODE

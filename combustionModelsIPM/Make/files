@@ -2,4 +2,4 @@ edcIPM/edcsIPM.C
 pasrIPM/pasrsIPM.C
 laminarIPM/laminarsIPM.C
 
-LIB = $(FOAM_LIBBIN)/libcombustionModelsIPM
+LIB = $(FOAM_LIBBIN)/libcombustionModelsIPM$(MODEL_NAME)
