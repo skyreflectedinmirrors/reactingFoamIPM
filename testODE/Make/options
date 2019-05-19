@@ -22,8 +22,10 @@ EXE_LIBS = \
     -lchemistryModel \
     -lfiniteVolume \
     -lmeshTools \
-    -lchemistryModelIPM \
+    -lchemistryModelIPM$(MODEL_NAME) \
     -lODE \
-    -lBatchedODE \
+    -lBatchedODE$(MODEL_NAME) \
     -L$(IPM_LIBPATH) \
+    -Wl,-rpath,$(PYJAC_LIB_PATH) \
+    -Wl,-rpath,$(ACCELERINT_LIB_PATH) \
     -lipm

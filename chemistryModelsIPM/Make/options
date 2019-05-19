@@ -22,7 +22,7 @@ LIB_LIBS = \
     -lreactionThermophysicalModels \
     -lspecie \
     -lODE \
-    -lBatchedODE \
+    -lBatchedODE$(MODEL_NAME) \
     -lfiniteVolume \
     -lmeshTools \
     -lchemistryModel \

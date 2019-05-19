@@ -20,7 +20,7 @@ LIB_LIBS = \
     -lcompressibleTransportModels \
     -lturbulenceModels \
     -lcompressibleTurbulenceModels \
-    -lchemistryModelIPM \
+    -lchemistryModelIPM$(MODEL_NAME) \
     -lfiniteVolume \
     -lmeshTools \
     -lcombustionModels \

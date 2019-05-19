@@ -29,10 +29,12 @@ EXE_LIBS = \
     -lspecie \
     -lcompressibleTransportModels \
     -lfluidThermophysicalModels \
-    -lchemistryModelIPM \
+    -lchemistryModelIPM$(MODEL_NAME) \
     -lODE \
-    -lBatchedODE \
-    -lcombustionModelsIPM \
+    -lBatchedODE$(MODEL_NAME) \
+    -lcombustionModelsIPM$(MODEL_NAME) \
     -L$(IPM_LIBPATH) \
     -lipm \
+    -Wl,-rpath,$(PYJAC_LIB_PATH) \
+    -Wl,-rpath,$(ACCELERINT_LIB_PATH) \
     $(PLIBS)
