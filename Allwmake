@@ -53,7 +53,7 @@ cd ${0%/*} || exit 1    # Run from this directory
 }
 
 if [ -n "$MODEL_NAME" ]; then
-    MODEL_NAME="_" + $MODEL_NAME
+    MODEL_NAME="_$MODEL_NAME"
 else
     echo "Model name not defined, will overwrite any previously compiled "
     echo "reactingFoamIPM versions."
