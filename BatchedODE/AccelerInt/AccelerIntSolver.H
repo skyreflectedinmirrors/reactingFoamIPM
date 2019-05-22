@@ -41,8 +41,6 @@ SourceFiles
 #include "Dictionary.H"
 #include "BatchedODESolver.H"
 #include "solver_interface.hpp"
-// include pyJac wrapper
-#include "jacobian_main.oclh"
 // include paths library from accelerInt for covenience
 #include "path.h"
 
