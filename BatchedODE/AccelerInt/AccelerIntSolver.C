@@ -37,6 +37,15 @@ namespace Foam
 }
 
 
+class JacobianKernel
+{
+public:
+    size_t numSpecies();
+    size_t requiredMemorySize();
+    size_t resize(size_t problem_size, size_t work_size, bool do_not_compile=false);
+};
+
+
 #define xstringify(s) (stringify(s))
 #define stringify(s) (#s)
 
@@ -51,7 +60,7 @@ Foam::AccelerIntSolver::AccelerIntSolver(const BatchedODESystem& ode, const dict
     vectorSize_(checkVectorSize(dict.lookupOrDefault<label>("vectorSize", 0))),
     blockSize_(checkBlockSize(dict.lookupOrDefault<label>("blockSize", 0))),
     order_("C"),
-    pyjac_path_(xstringify(PYJAC_PATH)),
+    pyjac_path_(dict.lookupOrDefault<label>("pyjacPath", "pyjac/")),
     our_path_(xstringify(WRAPPER_PATH))
 {
     if (vectorSize_ && blockSize_)
