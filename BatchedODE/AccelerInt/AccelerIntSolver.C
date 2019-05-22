@@ -81,6 +81,7 @@ Foam::AccelerIntSolver::AccelerIntSolver(const BatchedODESystem& ode, const dict
     // build paths to files
     filesystem::path _p(our_path_);
     filesystem::path _pj(pyjac_path_);
+    Info << "Loading OpenCL kernels from: " << pyjac_path_ << nl;
     std::vector<std::string> files = {
         (_p/filesystem::path("jac.cl")).str(),
         (_p/filesystem::path("dydt.cl")).str(),
