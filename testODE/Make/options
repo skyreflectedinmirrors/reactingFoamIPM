@@ -26,6 +26,8 @@ EXE_LIBS = \
     -lODE \
     -lBatchedODE$(MODEL_NAME) \
     -L$(IPM_LIBPATH) \
+    -L$(PYJAC_LIB_PATH) \
     -Wl,-rpath,$(PYJAC_LIB_PATH) \
+    -locl_pyjac \
     -Wl,-rpath,$(ACCELERINT_LIB_PATH) \
     -lipm
