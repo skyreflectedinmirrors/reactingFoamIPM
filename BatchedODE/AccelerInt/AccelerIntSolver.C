@@ -40,9 +40,9 @@ namespace Foam
 class Kernel
 {
 public:
-    static unsigned int numSpecies();
-    static unsigned int requiredMemorySize();
-    size_t resize(unsigned int problem_size, unsigned int work_size, bool do_not_compile=false);
+    static size_t numSpecies();
+    static size_t requiredMemorySize();
+    size_t resize(size_t problem_size, size_t work_size, bool do_not_compile=false);
 };
 
 class JacobianKernel : public Kernel
