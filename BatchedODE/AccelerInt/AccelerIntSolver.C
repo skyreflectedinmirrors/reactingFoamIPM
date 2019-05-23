@@ -65,7 +65,7 @@ Foam::AccelerIntSolver::AccelerIntSolver(const BatchedODESystem& ode, const dict
     vectorSize_(checkVectorSize(dict.lookupOrDefault<label>("vectorSize", 0))),
     blockSize_(checkBlockSize(dict.lookupOrDefault<label>("blockSize", 0))),
     order_("C"),
-    pyjac_path_(dict.lookupOrDefault<word>("pyjacPath", "pyjac/")),
+    pyjac_path_(dict.lookupOrDefault<fileName>("pyjacPath", "pyjac/")),
     our_path_(xstringify(WRAPPER_PATH))
 {
     if (vectorSize_ && blockSize_)

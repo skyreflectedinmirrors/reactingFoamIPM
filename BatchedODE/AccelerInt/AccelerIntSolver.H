@@ -64,7 +64,7 @@ protected:
     const label vectorSize_;
     const label blockSize_;
     const word order_;
-    const word pyjac_path_;
+    const fileName pyjac_path_;
     const word our_path_;
 
     std::unique_ptr<opencl_solvers::SolverOptions> _options;
