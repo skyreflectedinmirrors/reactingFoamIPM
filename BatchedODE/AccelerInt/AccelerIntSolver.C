@@ -70,7 +70,8 @@ Foam::AccelerIntSolver::AccelerIntSolver(const BatchedODESystem& ode, const dict
     order_("C"),
     pyjac_path_(word(dict.lookupOrDefault<fileName>("pyjacPath", "pyjac/"))),
     our_path_(xstringify(WRAPPER_PATH)),
-    include_path(2)
+    include_path(),
+    files()
 {
     if (vectorSize_ && blockSize_)
     {
@@ -100,12 +101,11 @@ Foam::AccelerIntSolver::AccelerIntSolver(const BatchedODESystem& ode, const dict
     filesystem::path _p(our_path_);
     filesystem::path _pj(pyjac_path_);
     Info << "Loading OpenCL kernels from: " << pyjac_path_ << nl;
-    std::vector<std::string> files = {
-        (_p/filesystem::path("jac.cl")).str(),
-        (_p/filesystem::path("dydt.cl")).str(),
-        (_pj/filesystem::path("jacobian.ocl")).str(),
-        (_pj/filesystem::path("species_rates.ocl")).str(),
-        (_pj/filesystem::path("chem_utils.ocl")).str()};
+    files.push_back((_p/filesystem::path("jac.cl")).str());
+    files.push_back((_p/filesystem::path("dydt.cl")).str());
+    files.push_back((_pj/filesystem::path("jacobian.ocl")).str());
+    files.push_back((_pj/filesystem::path("species_rates.ocl")).str());
+    files.push_back((_pj/filesystem::path("chem_utils.ocl")).str());
 
     // create pyjac kernel
     int init = 0;

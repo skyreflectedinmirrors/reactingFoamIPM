@@ -76,6 +76,7 @@ protected:
     inline opencl_solvers::IntegratorType integratorType(const word accSolver_) const;
     inline opencl_solvers::DeviceType deviceType(const word deviceType_) const;
     std::vector<std::string> include_path;
+    std::vector<std::string> files;
 
 
 public:
