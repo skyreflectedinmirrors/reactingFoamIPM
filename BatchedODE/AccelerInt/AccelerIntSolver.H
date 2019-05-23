@@ -64,7 +64,7 @@ protected:
     const label vectorSize_;
     const label blockSize_;
     const word order_;
-    const fileName pyjac_path_;
+    const word pyjac_path_;
     const word our_path_;
 
     std::unique_ptr<opencl_solvers::SolverOptions> _options;
@@ -75,6 +75,7 @@ protected:
     inline label checkBlockSize(const label blockSize) const;
     inline opencl_solvers::IntegratorType integratorType(const word accSolver_) const;
     inline opencl_solvers::DeviceType deviceType(const word deviceType_) const;
+    std::vector<std::string> include_path;
 
 
 public:

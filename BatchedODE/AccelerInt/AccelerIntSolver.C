@@ -68,8 +68,9 @@ Foam::AccelerIntSolver::AccelerIntSolver(const BatchedODESystem& ode, const dict
     vectorSize_(checkVectorSize(dict.lookupOrDefault<label>("vectorSize", 0))),
     blockSize_(checkBlockSize(dict.lookupOrDefault<label>("blockSize", 0))),
     order_("C"),
-    pyjac_path_(dict.lookupOrDefault<fileName>("pyjacPath", "pyjac/")),
-    our_path_(xstringify(WRAPPER_PATH))
+    pyjac_path_(word(dict.lookupOrDefault<fileName>("pyjacPath", "pyjac/"))),
+    our_path_(xstringify(WRAPPER_PATH)),
+    include_path(2)
 {
     if (vectorSize_ && blockSize_)
     {
@@ -156,7 +157,8 @@ Foam::AccelerIntSolver::AccelerIntSolver(const BatchedODESystem& ode, const dict
         }
     }
     // finally, create the IVP
-    std::vector<std::string> include_path = {pyjac_path_};
+    include_path.push_back(pyjac_path_);
+    include_path.push_back(our_path_);
     _ivp.reset(new opencl_solvers::IVP(files, work_size, 0, include_path));
     // and build integrator
     _integrator = std::move(opencl_solvers::init(
