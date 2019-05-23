@@ -101,12 +101,12 @@ Foam::AccelerIntSolver::AccelerIntSolver(const BatchedODESystem& ode, const dict
     filesystem::path _p(our_path_);
     filesystem::path _pj(pyjac_path_);
     Info << "Loading OpenCL kernels from: " << pyjac_path_ << nl;
-    files.push_back((_p/filesystem::path("jac.cl")).make_absolute().str());
-    files.push_back((_p/filesystem::path("dydt.cl")).make_absolute().str());
-    files.push_back((_pj/filesystem::path("jacobian.ocl")).make_absolute().str());
-    files.push_back((_pj/filesystem::path("species_rates.ocl")).make_absolute().str());
-    files.push_back((_pj/filesystem::path("chem_utils.ocl")).make_absolute().str());
-
+    files.push_back((_p/filesystem::path("jac.cl")).str());
+    files.push_back((_p/filesystem::path("dydt.cl")).str());
+    files.push_back((_pj/filesystem::path("jacobian.ocl")).str());
+    files.push_back((_pj/filesystem::path("species_rates.ocl")).str());
+    files.push_back((_pj/filesystem::path("chem_utils.ocl")).str());
+    this->make_absolute(files);
     // create pyjac kernel
     int init = 0;
     MPI_Initialized(&init);
@@ -157,8 +157,9 @@ Foam::AccelerIntSolver::AccelerIntSolver(const BatchedODESystem& ode, const dict
         }
     }
     // finally, create the IVP
-    include_path.push_back(_p.make_absolute().str());
-    include_path.push_back(_pj.make_absolute().str());
+    include_path.push_back(pyjac_path_);
+    include_path.push_back(our_path_);
+    this->make_absolute(include_path);
     _ivp.reset(new opencl_solvers::IVP(files, work_size, 0, include_path));
     // and build integrator
     _integrator = std::move(opencl_solvers::init(

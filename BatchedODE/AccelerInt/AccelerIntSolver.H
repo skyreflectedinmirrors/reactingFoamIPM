@@ -78,6 +78,14 @@ protected:
     std::vector<std::string> include_path;
     std::vector<std::string> files;
 
+    void make_absolute(std::vector<std::string>& vec)
+    {
+        for (size_t i = 0; i < vec.size(); ++i)
+        {
+            vec[i] = filesystem::path(vec[i]).make_absolute().str();
+        }
+    }
+
 
 public:
 
