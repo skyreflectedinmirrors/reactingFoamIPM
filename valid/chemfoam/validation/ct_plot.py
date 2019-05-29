@@ -234,7 +234,7 @@ def sample(times, arr, base_times, base, npoints=75, aspect_ratio=8.0 / 6.0,
 
 def err(pressure, temperature, phi, endtime, to_plot,
         draw_samples, thin_mode, do_err=True, ymin=None, thin_rate=75,
-        thin_percent=10, xmin=None, xmax=None):
+        thin_percent=10, xmin=None, xmax=None, plot_err=False):
     gas = get_gas()
     acc = np.loadtxt(os.path.join(script_dir, '{}_{}_{}.accelode'.format(
                      int(pressure), int(temperature), float(phi))),
@@ -245,6 +245,7 @@ def err(pressure, temperature, phi, endtime, to_plot,
 
     sample_times = acc[:, 0]
     assert np.allclose(sample_times, OF[:, 0])
+    err_compare = {}
     if do_err:
         # get temperature comparison
         comp_ct = ignition(pressure, temperature, phi,
@@ -258,6 +259,11 @@ def err(pressure, temperature, phi, endtime, to_plot,
         filename = '{}_{}_{}.npz'.format(int(pressure / ct.one_atm),
                                          int(temperature), float(phi))
         np.savez(filename, **errs)
+
+        if plot_err:
+            err_compare['OF'] = np.abs(OF[:, 1:] - comp_ct[:, 1:])
+            err_compare['AI'] = np.abs(acc[:, 1:] - comp_ct[:, 1:])
+
 
     # load plotter's
     phi_ct = ignition(pressure, temperature, phi, endtime=endtime)
@@ -307,16 +313,35 @@ def err(pressure, temperature, phi, endtime, to_plot,
             plt.ylim((ymin, None))
         if xmin or xmax:
             plt.xlim((xmin, xmax))
+
+        if plot_err:
+            assert do_err, "Must evaluate error to plot!"
+            plt.twinx()
+            plt.plot(acc[:, 0], err_compare['AI'][:, 1 + ind],
+                     label=r'\texttt{accelerInt}-error', **wheel(1),
+                     zorder=2)
+            plt.plot(acc[:, 0], err_compare['OF'][:, 1 + ind],
+                     label=r'\texttt{OpenFOAM}-error', **wheel(2),
+                     zorder=2)
+            plt.ylabel('Absolute Error')
+            plt.gca(0)
+
         plt.legend(**{'loc': 0,
                       'fontsize': 18,
                       'numpoints': 1,
                       'shadow': True,
                       'fancybox': True})
-        plt.tick_params(axis='both', which='major', labelsize=22)
-        plt.tick_params(axis='both', which='minor', labelsize=14)
-        for item in (plt.gca().title, plt.gca().xaxis.label,
-                     plt.gca().yaxis.label):
-            item.set_fontsize(28)
+        def stylize(gca):
+            plt.gca(gca)
+            plt.tick_params(axis='both', which='major', labelsize=22)
+            plt.tick_params(axis='both', which='minor', labelsize=14)
+            for item in (plt.gca().title, plt.gca().xaxis.label,
+                         plt.gca().yaxis.label):
+                item.set_fontsize(28)
+
+        stylize(0)
+        if plot_err:
+            stylize(1)
         plt.tight_layout()
         plt.savefig('{}_{}_{}_{}.pdf'.format(
             int(pressure / ct.one_atm), int(temperature), phi,
@@ -386,9 +411,14 @@ if __name__ == '__main__':
                         type=int,
                         help='The allowed percent difference between successive '
                              'plotted points in `slice` mode.')
+    parser.add_argument('-d', '--do_error_plot',
+                        help='Plot the absolute error of each solution as compared '
+                             'to cantera, in addition to the normal plots.',
+                        default=False,
+                        action='store_true')
     args = parser.parse_args()
     err(args.pressure, args.temperature, args.phi, args.endtime, args.to_plot,
         args.draw_sample_times, args.thin_mode, not args.no_error, args.ymin,
-        args.thin_rate, args.thin_percent, args.xmin, args.xmax)
+        args.thin_rate, args.thin_percent, args.xmin, args.xmax, args.do_error_plot)
 
     sys.exit(0)
