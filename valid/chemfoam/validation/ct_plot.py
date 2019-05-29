@@ -129,11 +129,25 @@ def wheel(index):
     return style
 
 
-def label(to_plot):
+def label(to_plot, error=None):
     if to_plot == 'T':
-        return 'Temperature (K)', False
+        if error:
+            return 'Abs. Error (K)', False
+        else:
+            return 'Temperature (K)', True
     else:
-        return r'$Y_{{\ce{{{}}}}}$'.format(to_plot), True
+        mass_frac = r'$Y_{{\ce{{{}}}}}$'.format(to_plot)
+        if not error:
+            return mass_frac, True
+        else:
+            return 'Abs. Error ({})'.format(mass_frac), True
+
+
+def legend_error(to_plot, name):
+    if to_plot == 'T':
+        return r'T_{{{}}}'.format(name)
+    else:
+        return r'Y_{{\ce{{{},{}}}}}'.format(to_plot, name)
 
 
 def arc_length(x, y, aspect=None, interval=None, ylog=False):
@@ -261,9 +275,9 @@ def err(pressure, temperature, phi, endtime, to_plot,
         np.savez(filename, **errs)
 
         if plot_err:
-            err_compare['OF'] = np.abs(OF[:, 1:] - comp_ct[:, 1:])
-            err_compare['AI'] = np.abs(acc[:, 1:] - comp_ct[:, 1:])
-
+            err_compare['OF'] = (OF[:, 0], np.abs(OF[:, 1:] - comp_ct[:, 1:]))
+            err_compare['AI'] = (acc[:, 0], np.abs(
+                acc[:, 1:] - comp_ct[:, 1:]))
 
     # load plotter's
     phi_ct = ignition(pressure, temperature, phi, endtime=endtime)
@@ -279,7 +293,6 @@ def err(pressure, temperature, phi, endtime, to_plot,
             for x in sample_times:
                 plt.axvline(x=x, linestyle='--', color=get_color(3))
         ind = (['T'] + gas.species_names).index(val)
-        ylabel, ylog = label(val)
         plt.plot(phi_ct[:, 0], phi_ct[:, 1 + ind],
                  label='Cantera', **wheel(0),
                  zorder=3)
@@ -305,48 +318,52 @@ def err(pressure, temperature, phi, endtime, to_plot,
                          xrangev=xrangev),
                  label=r'\texttt{OpenFOAM}', **wheel(2),
                  zorder=1)
-        plt.xlabel('Time (s)')
-        plt.ylabel(ylabel)
-        if ylog:
-            plt.yscale('log')
-        if ymin:
-            plt.ylim((ymin, None))
-        if xmin or xmax:
-            plt.xlim((xmin, xmax))
 
-        if plot_err:
-            assert do_err, "Must evaluate error to plot!"
-            plt.twinx()
-            plt.plot(acc[:, 0], err_compare['AI'][:, 1 + ind],
-                     label=r'\texttt{accelerInt}-error', **wheel(1),
-                     zorder=2)
-            plt.plot(acc[:, 0], err_compare['OF'][:, 1 + ind],
-                     label=r'\texttt{OpenFOAM}-error', **wheel(2),
-                     zorder=2)
-            plt.ylabel('Absolute Error')
-            plt.gca(0)
+        def _stylize(val, ylabel, ylog, is_err=False):
+            plt.xlabel('Time (s)')
+            plt.ylabel(ylabel)
+            if ylog:
+                plt.yscale('log')
+            if ymin:
+                plt.ylim((ymin, None))
+            if xmin or xmax:
+                plt.xlim((xmin, xmax))
 
-        plt.legend(**{'loc': 0,
-                      'fontsize': 18,
-                      'numpoints': 1,
-                      'shadow': True,
-                      'fancybox': True})
-        def stylize(gca):
-            plt.gca(gca)
+            plt.legend(**{'loc': 0,
+                          'fontsize': 18,
+                          'numpoints': 1,
+                          'shadow': True,
+                          'fancybox': True})
+
             plt.tick_params(axis='both', which='major', labelsize=22)
             plt.tick_params(axis='both', which='minor', labelsize=14)
             for item in (plt.gca().title, plt.gca().xaxis.label,
                          plt.gca().yaxis.label):
                 item.set_fontsize(28)
 
-        stylize(0)
+            plt.tight_layout()
+            plt.savefig('{}_{}_{}_{}{}.pdf'.format(
+                int(pressure / ct.one_atm), int(temperature), phi, val,
+                '' if not is_err else '_err'))
+            plt.close()
+
+        # plot main
+        _stylize(val, *label(val))
+
         if plot_err:
-            stylize(1)
-        plt.tight_layout()
-        plt.savefig('{}_{}_{}_{}.pdf'.format(
-            int(pressure / ct.one_atm), int(temperature), phi,
-            val))
-        plt.close()
+            ylabel, log = label(val, error=True)
+            assert do_err, "Must evaluate error to plot!"
+            plt.plot(err_compare['AI'][0], err_compare['AI'][1][:, 1 + ind],
+                     label=r'$\left\lVert {} - {} \right\rVert$'.format(
+                     legend_error(val, r'\texttt{AI}'),
+                     legend_error(val, r'\texttt{CT}')),
+                     **wheel(1), zorder=2)
+            plt.plot(err_compare['OF'][0], err_compare['OF'][1][:, 1 + ind],
+                     label=r'$\left\lVert {} - {} \right\rVert$'.format(
+                     legend_error(val, r'\texttt{OF}'),
+                     legend_error(val, r'\texttt{CT}')),
+                     **wheel(2), zorder=2)
+            _stylize(val, ylabel, log, is_err=True)
 
 
 if __name__ == '__main__':
