@@ -346,6 +346,8 @@ if __name__ == '__main__':
                         required=True)
     parser.add_argument('-p', '--to_plot',
                         nargs='+',
+                        help='The components of the solution (temperature, '
+                             'species names) to plot',
                         default=['T', 'CH4', 'OH', 'HO2', 'NO'])
     parser.add_argument('-s', '--draw_sample_times',
                         action='store_true',
@@ -382,8 +384,8 @@ if __name__ == '__main__':
     parser.add_argument('-tp', '--thin_percent',
                         default=10,
                         type=int,
-                        help='The allowed % difference between successive plotted'
-                             'points in `slice` mode.')
+                        help='The allowed percent difference between successive '
+                             'plotted points in `slice` mode.')
     args = parser.parse_args()
     err(args.pressure, args.temperature, args.phi, args.endtime, args.to_plot,
         args.draw_sample_times, args.thin_mode, not args.no_error, args.ymin,
