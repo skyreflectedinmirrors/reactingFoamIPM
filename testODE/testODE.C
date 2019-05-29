@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     // Initialise time progress
     scalar endtime = runTime.endTime().value();
 
-    label nPoints = 10;
+    label nPoints = 25;
     for (label i = 1; i <= nPoints; ++i)
     {
         scalar dt = endtime * (static_cast<scalar>(i) / static_cast<scalar>(nPoints));
