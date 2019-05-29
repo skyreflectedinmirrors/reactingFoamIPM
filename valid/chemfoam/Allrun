@@ -159,7 +159,8 @@ do
 
             # and call python script to plot
             runApplication -o python validation/ct_plot.py --pressure=$pressure \
-                --temperature=$temperature --phi=$phi --endtime=$et
+                --temperature=$temperature --phi=$phi --endtime=$et \
+                --do_error_plot
 
 
             # and remove time so that we don't end up with the wrong state
