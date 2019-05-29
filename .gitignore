@@ -55,3 +55,11 @@ run.log
 # pyjac / accelerint files
 lib/
 include/
+
+# validation files
+*.foam
+*.foamode
+*.accel
+*.accelode
+*.pdf
+*.npz

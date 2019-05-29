@@ -11,4 +11,5 @@
 #SBATCH --mail-user=nicholas.curtis@uconn.edu
 #SBATCH --dependency=singleton
 
+export num_proc="10"
 ./Allrun
