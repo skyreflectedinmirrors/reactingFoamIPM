@@ -107,10 +107,10 @@ Foam::AccelerIntSolver::AccelerIntSolver(const BatchedODESystem& ode, const dict
     files.push_back((_pj/filesystem::path("species_rates.ocl")).str());
     files.push_back((_pj/filesystem::path("chem_utils.ocl")).str());
     this->make_absolute(files);
+    JacobianKernel jk;
     // create pyjac kernel
     int init = 0;
     MPI_Initialized(&init);
-    JacobianKernel jk;
 
     // avoid data-races with kernel binary
     if (init)
@@ -157,8 +157,8 @@ Foam::AccelerIntSolver::AccelerIntSolver(const BatchedODESystem& ode, const dict
         }
     }
     // finally, create the IVP
-    include_path.push_back(pyjac_path_);
-    include_path.push_back(our_path_);
+    include_path.push_back(std::string(pyjac_path_.begin(), pyjac_path_.end()));
+    include_path.push_back(std::string(our_path_.begin(), our_path_.end()));
     this->make_absolute(include_path);
     _ivp.reset(new opencl_solvers::IVP(files, work_size, 0, include_path));
     // and build integrator

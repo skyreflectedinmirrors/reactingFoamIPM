@@ -26,7 +26,7 @@ to_accelerint() {
     foamDictionary -entry odeCoeffs.vectorSize -set 8 constant/chemistryProperties
     foamDictionary -entry odeCoeffs.absTol -set 1e-10 constant/chemistryProperties
     foamDictionary -entry odeCoeffs.relTol -set 1e-06 constant/chemistryProperties
-    foamDictionary -entry odeCoeffs.pyjacPath -set "~/reactingFoamIPM/include/opencl/" constant/chemistryProperties
+    foamDictionary -entry odeCoeffs.pyjacPath -set "\"~/reactingFoamIPM/include/opencl/\"" constant/chemistryProperties
 }
 
 to_foam() {
