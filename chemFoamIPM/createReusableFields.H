@@ -20,7 +20,7 @@
 
     scalar p0 = readScalar(initialConditions.lookup("p"));
     scalar T0 = readScalar(initialConditions.lookup("T"));
-    label nPoints = readScalar(label.lookupOrDefault("nPoints", 25));
+    label nPoints = initialConditions.lookupOrDefault<label>("nPoints", 25);
 
     #include "createReusableBaseFields.H"
 
