@@ -75,14 +75,17 @@ protected:
     inline label checkBlockSize(const label blockSize) const;
     inline opencl_solvers::IntegratorType integratorType(const word accSolver_) const;
     inline opencl_solvers::DeviceType deviceType(const word deviceType_) const;
-    std::vector<std::string> include_path;
-    std::vector<std::string> files;
+
+    std::string get_string(const std::string str)
+    {
+        return std::string(str.begin(), str.end());
+    }
 
     void make_absolute(std::vector<std::string>& vec)
     {
         for (size_t i = 0; i < vec.size(); ++i)
         {
-            vec[i] = filesystem::path(vec[i]).make_absolute().str();
+            vec[i] = get_string(filesystem::path(vec[i]).make_absolute().str());
         }
     }
 

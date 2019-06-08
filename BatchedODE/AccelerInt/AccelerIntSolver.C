@@ -69,9 +69,7 @@ Foam::AccelerIntSolver::AccelerIntSolver(const BatchedODESystem& ode, const dict
     blockSize_(checkBlockSize(dict.lookupOrDefault<label>("blockSize", 0))),
     order_("C"),
     pyjac_path_(word(dict.lookupOrDefault<fileName>("pyjacPath", "pyjac/"))),
-    our_path_(xstringify(WRAPPER_PATH)),
-    include_path(),
-    files()
+    our_path_(xstringify(WRAPPER_PATH))
 {
     if (vectorSize_ && blockSize_)
     {
@@ -97,21 +95,21 @@ Foam::AccelerIntSolver::AccelerIntSolver(const BatchedODESystem& ode, const dict
                                                      opencl_solvers::StepperType::ADAPTIVE,
                                                      std::numeric_limits<double>::quiet_NaN(),
                                                      true, false));
+    // create pyjac kernel
+    JacobianKernel jk;
+    int init = 1;
+    MPI_Initialized(&init);
     // build paths to files
     filesystem::path _p(our_path_);
     filesystem::path _pj(pyjac_path_);
     Info << "Loading OpenCL kernels from: " << pyjac_path_ << nl;
-    files.push_back((_p/filesystem::path("jac.cl")).str());
-    files.push_back((_p/filesystem::path("dydt.cl")).str());
-    files.push_back((_pj/filesystem::path("jacobian.ocl")).str());
-    files.push_back((_pj/filesystem::path("species_rates.ocl")).str());
-    files.push_back((_pj/filesystem::path("chem_utils.ocl")).str());
+    std::vector<std::string> files;
+    files.push_back(get_string((_p/filesystem::path("jac.cl")).str()));
+    files.push_back(get_string((_p/filesystem::path("dydt.cl")).str()));
+    files.push_back(get_string((_pj/filesystem::path("jacobian.ocl")).str()));
+    files.push_back(get_string((_pj/filesystem::path("species_rates.ocl")).str()));
+    files.push_back(get_string((_pj/filesystem::path("chem_utils.ocl")).str()));
     this->make_absolute(files);
-    JacobianKernel jk;
-    // create pyjac kernel
-    int init = 0;
-    MPI_Initialized(&init);
-
     // avoid data-races with kernel binary
     if (init)
     {
@@ -157,8 +155,9 @@ Foam::AccelerIntSolver::AccelerIntSolver(const BatchedODESystem& ode, const dict
         }
     }
     // finally, create the IVP
-    include_path.push_back(std::string(pyjac_path_.begin(), pyjac_path_.end()));
-    include_path.push_back(std::string(our_path_.begin(), our_path_.end()));
+    std::vector<std::string> include_path;
+    include_path.push_back(get_string(pyjac_path_));
+    include_path.push_back(get_string(our_path_));
     this->make_absolute(include_path);
     _ivp.reset(new opencl_solvers::IVP(files, work_size, 0, include_path));
     // and build integrator
