@@ -20,7 +20,7 @@ EXE_LIBS = \
     -lchemistryModel \
     -lfiniteVolume \
     -lmeshTools \
-    -lchemistryModelIPM \
+    -lchemistryModelIPM$(MODEL_NAME)\
     -lODE \
     -lBatchedODE$(MODEL_NAME) \
     -L$(IPM_LIBPATH) \
