@@ -22,4 +22,5 @@ LIB_LIBS = \
     -Wl,-rpath,$(PYJAC_LIB_PATH) \
     -locl_pyjac \
     -L$(IPM_LIBPATH) \
+    -Wl,-rpath,$(IPM_LIBPATH) \
     -lipm

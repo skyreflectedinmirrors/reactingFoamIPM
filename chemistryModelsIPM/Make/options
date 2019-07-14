@@ -27,4 +27,5 @@ LIB_LIBS = \
     -lmeshTools \
     -lchemistryModel \
     -L$(IPM_LIBPATH) \
+    -Wl,-rpath,$(IPM_LIBPATH) \
     -lipm

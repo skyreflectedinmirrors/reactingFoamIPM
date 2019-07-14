@@ -25,4 +25,5 @@ LIB_LIBS = \
     -lmeshTools \
     -lcombustionModels \
     -L$(IPM_LIBPATH) \
+    -Wl,-rpath,$(IPM_LIBPATH) \
     -lipm
