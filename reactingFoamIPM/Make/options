@@ -35,6 +35,7 @@ EXE_LIBS = \
     -lcombustionModelsIPM$(MODEL_NAME) \
     -L$(IPM_LIBPATH) \
     -lipm \
+    -Wl,-rpath,$(IPM_LIBPATH) \
     -Wl,-rpath,$(PYJAC_LIB_PATH) \
     -Wl,-rpath,$(ACCELERINT_LIB_PATH) \
     $(PLIBS)
