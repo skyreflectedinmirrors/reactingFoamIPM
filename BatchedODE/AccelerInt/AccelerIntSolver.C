@@ -43,6 +43,7 @@ public:
     Kernel();
     static size_t numSpecies();
     size_t resize(size_t problem_size, size_t work_size, bool do_not_compile=false);
+    virtual void compile() = 0;
 };
 
 class JacobianKernel : public Kernel
@@ -51,6 +52,7 @@ public:
     size_t requiredMemorySize() const;
     JacobianKernel();
     JacobianKernel(size_t problem_size, size_t work_size, bool do_not_compile=false);
+    void compile();
 };
 
 
