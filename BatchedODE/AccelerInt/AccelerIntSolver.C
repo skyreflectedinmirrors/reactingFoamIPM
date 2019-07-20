@@ -27,6 +27,8 @@ License
 #include "addToRunTimeSelectionTable.H"
 // include MPI header
 #include <mpi.h>
+// include pyjac header to define the Jacobian kernel
+#include "jacobian_main.oclh"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -35,27 +37,6 @@ namespace Foam
     defineTypeNameAndDebug(AccelerIntSolver, 0);
     addToRunTimeSelectionTable(BatchedODESolver, AccelerIntSolver, dictionary);
 }
-
-
-class Kernel
-{
-public:
-    Kernel();
-    static size_t numSpecies();
-    size_t resize(size_t problem_size, size_t work_size, bool do_not_compile=false);
-    virtual void compile() = 0;
-    virtual ~Kernel();
-};
-
-class JacobianKernel : public Kernel
-{
-public:
-    size_t requiredMemorySize() const;
-    JacobianKernel();
-    JacobianKernel(size_t problem_size, size_t work_size, bool do_not_compile=false);
-    void compile();
-};
-
 
 #define xstringify(s) (stringify(s))
 #define stringify(s) (#s)
